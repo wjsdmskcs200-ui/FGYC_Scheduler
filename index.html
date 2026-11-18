@@ -72,6 +72,10 @@ tr.late td.due{color:#e0483e;font-weight:700}
 #toast.on{opacity:.92}
 #warn{background:#fff3cd;color:#7a5b00;padding:10px 14px;font-size:13px;display:none}
 .timeSep{flex:none;font-weight:700}
+.radios{display:flex;gap:18px;flex:1}
+.radios label{display:flex;align-items:center;gap:6px;width:auto;font-size:15px;font-weight:600;color:#1e3a5f}
+.radios input{width:20px;height:20px}
+#prPastModal .card .body{padding:8px}
 .nw{display:inline-block;background:#e0483e;color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;margin-right:4px;vertical-align:middle}
 td.hl{background:#fff2a8 !important;box-shadow:inset 0 0 0 1px #f2c200;font-weight:700}
 header{position:relative}
@@ -86,6 +90,7 @@ header{position:relative}
   <div class="tabs" id="mainTabs">
     <button class="on" data-p="pSch">스케줄 관리</button>
     <button data-p="pDuty">당직 관리</button>
+    <button data-p="pPray">기도 담당자</button>
   </div>
 
   <!-- ================= 스케줄 관리 ================= -->
@@ -189,6 +194,101 @@ header{position:relative}
         <button class="btn gray sm" id="dRotate">선택 행부터 이후 순환 재배정</button>
       </div>
       <p class="note">선택한 행의 당직자를 기준으로, 그 날짜 이후 모든 행을 당직자 등록 순서대로 다시 배정합니다. (당직자 변경 후 한 달치 순서 조정용)</p>
+    </div>
+  </div>
+
+  <!-- ================= 기도 담당자 ================= -->
+  <div class="page" id="pPray">
+    <h2>기도 담당자</h2>
+
+    <div class="row"><label>구분</label>
+      <div class="radios">
+        <label><input type="radio" name="prCat" value="새벽기도" checked> 새벽기도</label>
+        <label><input type="radio" name="prCat" value="저녁기도"> 저녁기도</label>
+      </div>
+    </div>
+
+    <div class="row"><label>날짜</label><input type="date" id="prDate"></div>
+
+    <div class="row"><label>담당자1</label>
+      <input type="text" id="prW1" list="prList" placeholder="이름 입력/선택" maxlength="30">
+    </div>
+    <div class="row"><label>담당자2</label>
+      <input type="text" id="prW2" list="prList" placeholder="이름 입력/선택 (선택사항)" maxlength="30">
+    </div>
+    <datalist id="prList"></datalist>
+
+    <div class="row"><label>명단 등록</label>
+      <input type="text" id="prNew" placeholder="새 담당자 이름" maxlength="30">
+      <button class="btn gray" id="prAddWorker">+담당자</button>
+    </div>
+    <div class="chips" id="prChips"></div>
+    <div class="btns" style="margin-top:0"><button class="btn gray sm" id="prOrder">⇅ 담당자 기본 순서 설정</button></div>
+
+    <div class="btns g3">
+      <button class="btn" id="prAdd">추가</button>
+      <button class="btn orange" id="prEdit">수정</button>
+      <button class="btn gray" id="prUp">순서 ▲</button>
+      <button class="btn gray" id="prDown">순서 ▼</button>
+      <button class="btn red" id="prDel">삭제</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <colgroup><col style="width:36%"><col style="width:14%"><col style="width:50%"></colgroup>
+        <thead><tr><th>날짜</th><th>요일</th><th>담당자</th></tr></thead>
+        <tbody id="prBody"></tbody>
+      </table>
+    </div>
+    <p class="note">오늘 이후 일정만 표시됩니다. 순서 ▲▼ : 선택한 행의 담당자를 위/아래 행과 맞바꿉니다. (날짜는 그대로)</p>
+    <div class="btns" style="margin-top:6px"><button class="btn gray sm" id="prPast">🕘 지난 2주 보기</button></div>
+
+    <div class="box" style="margin-top:12px">
+      <b style="font-size:13px">📅 기도 담당 일괄 도구</b>
+      <div class="row" style="margin-top:8px"><label style="width:50px">기간</label>
+        <input type="date" id="prFrom"><span class="timeSep">~</span><input type="date" id="prTo">
+      </div>
+      <div class="row"><label style="width:50px">시작</label>
+        <select id="prStartWorker"></select>
+        <button class="btn sm" id="prGen">기간 자동생성</button>
+      </div>
+      <p class="note">선택한 기간의 매일(위에서 고른 구분)을 담당자 기본 순서대로 2명씩 묶어 배정합니다. 이미 있는 날짜는 건너뜁니다. 시작 담당자를 고르면 그 사람부터, '이어서'는 직전 일정 다음 사람부터 시작합니다.</p>
+      <div class="btns" style="margin:8px 0 0">
+        <button class="btn gray sm" id="prRotate">선택 행부터 이후 순환 재배정</button>
+      </div>
+      <p class="note">선택한 행의 담당자1을 기준으로, 이후 모든 행을 기본 순서대로 2명씩 다시 배정합니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 지난 기도 담당자 모달 -->
+<div class="modal" id="prPastModal">
+  <div class="card">
+    <h3 id="prPastTitle">지난 2주</h3>
+    <div class="body">
+      <table style="font-size:12.5px">
+        <colgroup><col style="width:38%"><col style="width:14%"><col style="width:48%"></colgroup>
+        <thead><tr><th>날짜</th><th>요일</th><th>담당자</th></tr></thead>
+        <tbody id="prPastBody"></tbody>
+      </table>
+    </div>
+    <div class="foot"><button class="btn gray" id="prPastClose">닫기</button></div>
+  </div>
+</div>
+
+<!-- 기도 담당자 기본 순서 모달 -->
+<div class="modal" id="prWModal">
+  <div class="card">
+    <h3>기도 담당자 기본 순서</h3>
+    <div class="body">
+      <div id="prWOrderList"></div>
+      <p class="note">담당자를 누른 뒤 ▲▼ 로 순서를 바꾸고 [저장]을 누르세요. 기간 자동생성과 재배정은 이 순서를 따릅니다.</p>
+    </div>
+    <div class="foot">
+      <button class="btn gray sm" id="prWUp" style="flex:0 0 52px">▲</button>
+      <button class="btn gray sm" id="prWDown" style="flex:0 0 52px">▼</button>
+      <button class="btn green" id="prWSave">저장</button>
+      <button class="btn gray" id="prWClose">닫기</button>
     </div>
   </div>
 </div>
@@ -316,7 +416,7 @@ $('bell').onclick = async () => {
 let rtTimer;
 function startRealtime() {
   if (!sb) return;
-  const refresh = t => { clearTimeout(rtTimer); rtTimer = setTimeout(() => { t === 'schedules' ? loadSch() : loadDuty(); }, 300); };
+  const refresh = t => { clearTimeout(rtTimer); rtTimer = setTimeout(() => { t === 'schedules' ? loadSch() : t === 'duty' ? loadDuty() : loadPray(); }, 300); };
   sb.channel('rt-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, pl => {
       refresh('schedules');
@@ -336,9 +436,16 @@ function startRealtime() {
       notify(`교회 당직 알림. (${pl.eventType === 'INSERT' ? '추가' : '수정'})`,
         dot(r.duty_date || ''), `${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}  ${r.worker_name || ''}`);
     })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'prayer_schedule' }, pl => {
+      refresh('pray');
+      const r = pl.new || {};
+      if (pl.eventType === 'DELETE' || r.updated_by === CID) return;
+      notify(`교회 기도 알림. (${r.category || ''} ${pl.eventType === 'INSERT' ? '추가' : '수정'})`,
+        `${dot(r.pray_date || '')} (${wday(r.pray_date)})`, [r.worker1, r.worker2].filter(Boolean).join(', '));
+    })
     .subscribe();
 }
-setInterval(() => { renderSch(); renderDuty(); }, 60000); // 24시간 경과 시 NEW/하이라이트 자동 해제
+setInterval(() => { renderSch(); renderDuty(); renderPray(); }, 60000); // 24시간 경과 시 NEW/하이라이트 자동 해제
 
 /* ---------- 탭 ---------- */
 $('mainTabs').addEventListener('click', e => {
@@ -346,6 +453,7 @@ $('mainTabs').addEventListener('click', e => {
   document.querySelectorAll('#mainTabs button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === b.dataset.p));
   if (b.dataset.p === 'pDuty') loadDuty();
+  if (b.dataset.p === 'pPray') loadPray();
 });
 let tab = 'todo';
 $('subTabs').addEventListener('click', e => {
@@ -501,6 +609,206 @@ $('catSave').onclick = async () => {
     $('catModal').classList.remove('on');
     loadSch();
   } catch (e) { /* run()에서 토스트 표시 */ }
+};
+
+/* =================== 기도 담당자 =================== */
+const wday = s => { if (!s) return ''; const [y, m, d] = s.split('-').map(Number); return '일월화수목금토'[new Date(y, m - 1, d).getDay()]; };
+const addDays = (n, base) => { const d = base ? new Date(base) : new Date(); d.setDate(d.getDate() + n); return d; };
+let prWorkers = [], prRows = [], prSel = null;
+const prCat = () => document.querySelector('input[name=prCat]:checked').value;
+const prNames = r => [r.worker1, r.worker2].filter(Boolean).join(', ');
+const prVisible = () => prRows.filter(r => r.category === prCat() && r.pray_date >= today())
+  .sort((a, b) => a.pray_date.localeCompare(b.pray_date) || a.id - b.id);
+
+async function loadPray() {
+  if (!sb) { renderPray(); return; }
+  prWorkers = await run(sb.from('prayer_workers').select('*').order('sort_order').order('id'));
+  prRows = await run(sb.from('prayer_schedule').select('*').gte('pray_date', ymd(addDays(-14))).order('pray_date').order('id'));
+  renderPrWorkers(); renderPray();
+}
+function renderPrWorkers() {
+  const cur = $('prStartWorker').value;
+  $('prStartWorker').innerHTML = '<option value="">이어서 (직전 일정 다음)</option>' +
+    prWorkers.map((w, i) => `<option value="${w.id}">${i + 1}. ${esc(w.name)}부터</option>`).join('');
+  $('prStartWorker').value = cur;
+  $('prList').innerHTML = prWorkers.map(w => `<option value="${esc(w.name)}">`).join('');
+  $('prChips').innerHTML = prWorkers.length ? prWorkers.map((w, i) =>
+    `<span class="chip" data-n="${esc(w.name)}"><span class="t">${i + 1}. ${esc(w.name)}</span><b data-del="${w.id}">×</b></span>`).join('')
+    : '<span class="note" style="grid-column:1/-1">등록된 담당자가 없습니다. 이름 입력 후 [+담당자]</span>';
+}
+function renderPray() {
+  const rows = prVisible();
+  $('prBody').innerHTML = rows.length ? rows.map(r => `
+    <tr data-id="${r.id}" class="${r.id === prSel ? 'sel' : ''}">
+      <td class="w ${hl(r,'pray_date')}">${isNew(r) ? '<span class="nw">NEW</span>' : ''}${dot(r.pray_date)}</td>
+      <td class="w ${hl(r,'pray_date')}">${wday(r.pray_date)}</td>
+      <td class="w ${hl(r,'worker1') || hl(r,'worker2')}">${esc(prNames(r))}</td>
+    </tr>`).join('') : '<tr><td colspan="3" class="empty">오늘 이후 등록된 일정이 없습니다</td></tr>';
+}
+document.querySelectorAll('input[name=prCat]').forEach(r => r.addEventListener('change', () => { prSel = null; renderPray(); }));
+$('prChips').addEventListener('click', async e => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    if (!confirm('이 담당자를 명단에서 삭제할까요? (등록된 일정은 유지됩니다)')) return;
+    await run(sb.from('prayer_workers').delete().eq('id', del.dataset.del));
+    toast('삭제되었습니다'); loadPray(); return;
+  }
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  if (!$('prW1').value.trim()) $('prW1').value = chip.dataset.n;
+  else $('prW2').value = chip.dataset.n;
+});
+$('prAddWorker').onclick = async () => {
+  const n = $('prNew').value.trim(); if (!n) return toast('담당자 이름을 입력하세요');
+  if (prWorkers.some(w => w.name === n)) return toast('이미 등록된 담당자입니다');
+  await run(sb.from('prayer_workers').insert({ name: n, sort_order: prWorkers.length }));
+  $('prNew').value = ''; toast('담당자가 등록되었습니다'); loadPray();
+};
+$('prBody').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
+  const r = prRows.find(x => x.id == tr.dataset.id); if (!r) return;
+  prSel = r.id;
+  $('prDate').value = r.pray_date; $('prW1').value = r.worker1 || ''; $('prW2').value = r.worker2 || '';
+  renderPray();
+});
+function prPayload() {
+  let w1 = $('prW1').value.trim(), w2 = $('prW2').value.trim();
+  if (!w1 && w2) { w1 = w2; w2 = ''; }
+  const p = { pray_date: $('prDate').value, category: prCat(), worker1: w1, worker2: w2 };
+  if (!p.pray_date) { toast('날짜를 선택하세요'); return null; }
+  if (!w1) { toast('담당자를 입력하세요'); return null; }
+  if (w1 === w2) { toast('담당자1과 2가 같습니다'); return null; }
+  return p;
+}
+function needPrSel() { if (!prSel) { toast('표에서 행을 먼저 선택하세요'); return false; } return true; }
+$('prAdd').onclick = async () => {
+  const p = prPayload(); if (!p) return;
+  if (prRows.some(r => r.pray_date === p.pray_date && r.category === p.category))
+    return toast('이미 등록된 날짜입니다. 표에서 선택 후 수정하세요');
+  p.updated_by = CID;
+  await run(sb.from('prayer_schedule').insert(p));
+  toast('추가되었습니다'); prSel = null; loadPray();
+};
+$('prEdit').onclick = async () => {
+  if (!needPrSel()) return;
+  const p = prPayload(); if (!p) return;
+  if (prRows.some(r => r.id !== prSel && r.pray_date === p.pray_date && r.category === p.category))
+    return toast('그 날짜에 이미 다른 일정이 있습니다');
+  const meta = editMeta(prRows.find(x => x.id === prSel), p);
+  if (!meta) return toast('변경된 내용이 없습니다');
+  await run(sb.from('prayer_schedule').update({ ...p, ...meta }).eq('id', prSel));
+  toast('수정되었습니다'); loadPray();
+};
+$('prDel').onclick = async () => {
+  if (!needPrSel()) return;
+  if (!confirm('선택한 일정을 삭제할까요?')) return;
+  await run(sb.from('prayer_schedule').delete().eq('id', prSel));
+  toast('삭제되었습니다'); prSel = null; loadPray();
+};
+async function movePray(d) {
+  if (!needPrSel()) return;
+  const list = prVisible();
+  const i = list.findIndex(x => x.id === prSel), j = i + d;
+  if (j < 0 || j >= list.length) return toast(d < 0 ? '맨 위입니다' : '맨 아래입니다');
+  const a = list[i], b = list[j];
+  const pa = { worker1: b.worker1, worker2: b.worker2 }, pb = { worker1: a.worker1, worker2: a.worker2 };
+  await Promise.all([
+    run(sb.from('prayer_schedule').update({ ...pa, ...editMeta(a, pa) }).eq('id', a.id)),
+    run(sb.from('prayer_schedule').update({ ...pb, ...editMeta(b, pb) }).eq('id', b.id))
+  ]);
+  prSel = b.id; await loadPray(); toast('담당자를 교환했습니다');
+}
+$('prUp').onclick = () => movePray(-1);
+$('prDown').onclick = () => movePray(1);
+
+/* 지난 2주 팝업 */
+$('prPast').onclick = () => {
+  const from = ymd(addDays(-14)), t = today(), c = prCat();
+  const rows = prRows.filter(r => r.category === c && r.pray_date >= from && r.pray_date < t)
+    .sort((a, b) => b.pray_date.localeCompare(a.pray_date));
+  $('prPastTitle').textContent = `${c} 지난 2주 (${dot(from)} ~)`;
+  $('prPastBody').innerHTML = rows.length ? rows.map(r => `
+    <tr><td class="w">${dot(r.pray_date)}</td><td class="w">${wday(r.pray_date)}</td><td class="w">${esc(prNames(r))}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty">지난 2주간 기록이 없습니다</td></tr>';
+  $('prPastModal').classList.add('on');
+};
+$('prPastClose').onclick = () => $('prPastModal').classList.remove('on');
+
+/* 기본 순서 설정 */
+let prWWork = [], prWSel = null;
+function renderPrWModal() {
+  $('prWOrderList').innerHTML = prWWork.length ? prWWork.map((w, i) => `
+    <div class="item ${i === prWSel ? 'sel' : ''}" data-i="${i}">
+      <b style="color:#999;width:22px">${i + 1}</b><span>${esc(w.name)}</span>
+    </div>`).join('') : '<div class="empty">등록된 담당자가 없습니다</div>';
+}
+$('prOrder').onclick = () => {
+  if (!sb) return toast('Supabase 설정이 필요합니다');
+  if (!prWorkers.length) return toast('먼저 담당자를 등록하세요');
+  prWWork = prWorkers.map(w => ({ id: w.id, name: w.name })); prWSel = null;
+  renderPrWModal(); $('prWModal').classList.add('on');
+};
+$('prWClose').onclick = () => $('prWModal').classList.remove('on');
+$('prWOrderList').addEventListener('click', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  prWSel = Number(it.dataset.i); renderPrWModal();
+});
+function movePrW(d) {
+  if (prWSel === null) return toast('담당자를 선택하세요');
+  const j = prWSel + d; if (j < 0 || j >= prWWork.length) return;
+  [prWWork[prWSel], prWWork[j]] = [prWWork[j], prWWork[prWSel]]; prWSel = j; renderPrWModal();
+}
+$('prWUp').onclick = () => movePrW(-1);
+$('prWDown').onclick = () => movePrW(1);
+$('prWSave').onclick = async () => {
+  try {
+    await Promise.all(prWWork.map((w, i) => run(sb.from('prayer_workers').update({ sort_order: i }).eq('id', w.id))));
+    toast('기본 순서가 저장되었습니다'); $('prWModal').classList.remove('on'); loadPray();
+  } catch (e) {}
+};
+
+/* 기간 자동생성: 매일 2명씩 순환 */
+$('prGen').onclick = async () => {
+  if (prWorkers.length < 1) return toast('먼저 담당자를 등록하세요');
+  const from = $('prFrom').value, to = $('prTo').value;
+  if (!from || !to || from > to) return toast('기간을 올바르게 선택하세요');
+  const c = prCat(), n = prWorkers.length;
+  const pick = $('prStartWorker').value;
+  let idx;
+  if (pick !== '') idx = prWorkers.findIndex(w => String(w.id) === pick);
+  else {
+    const prev = prRows.filter(r => r.category === c && r.pray_date < from).pop();
+    const last = prev ? (prev.worker2 || prev.worker1) : null;
+    idx = last ? prWorkers.findIndex(w => w.name === last) + 1 : 0;
+  }
+  if (idx < 0) idx = 0;
+  const exist = new Set(prRows.filter(r => r.category === c).map(r => r.pray_date));
+  const rows = [];
+  for (let d = new Date(from + 'T00:00:00'); ymd(d) <= to; d.setDate(d.getDate() + 1)) {
+    const s = ymd(d); if (exist.has(s)) continue;
+    const w1 = prWorkers[idx % n].name; idx++;
+    let w2 = ''; if (n > 1) { w2 = prWorkers[idx % n].name; idx++; }
+    rows.push({ pray_date: s, category: c, worker1: w1, worker2: w2, updated_by: CID });
+  }
+  if (!rows.length) return toast('생성할 날짜가 없습니다');
+  if (!confirm(`${c} ${rows.length}일치를 생성할까요?`)) return;
+  await run(sb.from('prayer_schedule').insert(rows));
+  toast(`${rows.length}건 생성되었습니다`); loadPray();
+};
+$('prRotate').onclick = async () => {
+  if (!needPrSel()) return;
+  if (!prWorkers.length) return toast('먼저 담당자를 등록하세요');
+  const list = prVisible(), i = list.findIndex(x => x.id === prSel), n = prWorkers.length;
+  let idx = prWorkers.findIndex(w => w.name === list[i].worker1); if (idx < 0) idx = 0;
+  const targets = list.slice(i);
+  if (!confirm(`선택한 행부터 ${targets.length}건을 기본 순서대로 다시 배정할까요?`)) return;
+  await Promise.all(targets.map(r => {
+    const w1 = prWorkers[idx % n].name; idx++;
+    let w2 = ''; if (n > 1) { w2 = prWorkers[idx % n].name; idx++; }
+    if (w1 === r.worker1 && w2 === (r.worker2 || '')) return null;
+    const p = { worker1: w1, worker2: w2 };
+    return run(sb.from('prayer_schedule').update({ ...p, ...editMeta(r, p) }).eq('id', r.id));
+  }));
+  toast('재배정되었습니다'); loadPray();
 };
 
 /* =================== 당직 관리 =================== */
@@ -734,6 +1042,7 @@ $('dRotate').onclick = async () => {
 $('sDate').value = today();
 $('sDue').value = today();
 $('dDate').value = today();
+$('prDate').value = today(); $('prFrom').value = today(); $('prTo').value = ymd(addDays(13));
 $('dMonth').value = today().slice(0, 7);
 renderSch(); renderDuty();
 if (sb) { loadSch(); loadDuty(); startRealtime(); }
