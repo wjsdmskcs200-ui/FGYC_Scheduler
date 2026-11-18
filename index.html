@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#1e3a5f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="영산교회">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>순복음 영산교회</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;overflow-x:hidden;font-family:-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;background:#f1f4f8;color:#222;font-size:15px}
+.wrap{max-width:720px;margin:0 auto;min-height:100vh;background:#fff;padding-bottom:40px}
+header{background:#1e3a5f;color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;font-size:18px;font-weight:700;text-align:center}
+.tabs{display:flex}
+.tabs button{flex:1;padding:12px 0;border:0;background:#e6ebf2;font-size:15px;font-weight:600;color:#555;border-bottom:3px solid transparent}
+.tabs button.on{background:#fff;color:#1e3a5f;border-bottom-color:#1e3a5f}
+.sub button{font-size:14px;padding:10px 0}
+.sub{background:#f7f9fc}
+.sub button.on{border-bottom-color:#2f80ed;color:#2f80ed}
+.page{display:none;padding:14px}
+.page.on{display:block}
+h2{margin:0 0 12px;font-size:17px;color:#1e3a5f;text-align:center}
+.row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.row>label{width:64px;flex:none;font-weight:600;font-size:13px;color:#444}
+input,select,textarea{width:100%;min-width:0;padding:10px;border:1px solid #c9d1dc;border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
+input:disabled{background:#eceff3;color:#999}
+input[type=checkbox]{width:22px;height:22px;flex:none}
+textarea{resize:none}
+button{font-family:inherit}
+.btn{padding:10px 12px;border:0;border-radius:8px;font-size:14px;font-weight:600;background:#2f80ed;color:#fff;white-space:nowrap}
+.btn.gray{background:#6b7785}.btn.red{background:#e0483e}.btn.green{background:#27ae60}.btn.orange{background:#f2994a}
+.btn.sm{padding:6px 10px;font-size:12px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.btns .btn{flex:1;min-width:56px}
+.btns.g3{display:grid;grid-template-columns:repeat(3,1fr)}
+.btns.g3 .btn{min-width:0}
+.tbl-wrap{overflow-x:auto;border:1px solid #d8dee7;border-radius:8px}
+table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px}
+th{background:#1e3a5f;color:#fff;padding:8px 6px;white-space:nowrap;position:sticky;top:0}
+td{padding:8px 6px;border-top:1px solid #e5e9ef;vertical-align:top}
+td.c{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.w{word-break:keep-all}
+tr.sel td{background:#dcebff}
+tr.late td.due{color:#e0483e;font-weight:700}
+.empty{text-align:center;color:#999;padding:24px}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:0 0 12px}
+.chip{background:#e8f0fb;color:#1e3a5f;border-radius:16px;padding:5px 6px 5px 12px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.chip .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip b{width:20px;height:20px;border-radius:50%;background:#c9d6ea;text-align:center;line-height:20px;font-size:12px}
+.box{background:#f7f9fc;border:1px dashed #b9c4d3;border-radius:8px;padding:10px;margin-bottom:14px}
+.box .row{margin-bottom:8px}
+.note{font-size:12px;color:#777;margin:4px 0 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal.on{display:flex}
+.card{background:#fff;border-radius:12px;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column}
+.card h3{margin:0;padding:14px;font-size:16px;color:#1e3a5f;border-bottom:1px solid #e5e9ef}
+.card .body{padding:12px 14px;overflow-y:auto}
+.card .foot{padding:12px 14px;border-top:1px solid #e5e9ef;display:flex;gap:8px}
+.card .foot .btn{flex:1}
+.item{display:flex;align-items:center;gap:6px;padding:9px 10px;border:1px solid #d8dee7;border-radius:8px;margin-bottom:6px}
+.item.sel{background:#dcebff;border-color:#2f80ed}
+.item span{flex:1}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:99;max-width:90%}
+#toast.on{opacity:.92}
+#warn{background:#fff3cd;color:#7a5b00;padding:10px 14px;font-size:13px;display:none}
+.timeSep{flex:none;font-weight:700}
+.nw{display:inline-block;background:#e0483e;color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;margin-right:4px;vertical-align:middle}
+td.hl{background:#fff2a8 !important;box-shadow:inset 0 0 0 1px #f2c200;font-weight:700}
+header{position:relative}
+#bell{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.18);border:0;border-radius:50%;width:34px;height:34px;font-size:17px;color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>순복음 영산교회<button id="bell" title="알림 허용">🔔</button></header>
+  <div id="warn">⚠ index.html 상단 SUPABASE_URL / SUPABASE_KEY 를 본인 프로젝트 값으로 바꿔주세요.</div>
+
+  <div class="tabs" id="mainTabs">
+    <button class="on" data-p="pSch">스케줄 관리</button>
+    <button data-p="pDuty">당직 관리</button>
+  </div>
+
+  <!-- ================= 스케줄 관리 ================= -->
+  <div class="page on" id="pSch">
+    <div class="tabs sub" id="subTabs">
+      <button class="on" data-s="todo">미완</button>
+      <button data-s="done">완료</button>
+    </div>
+    <div style="height:14px"></div>
+    <h2>순복음 영산교회_스케줄 관리</h2>
+
+    <div class="row"><label>마감일</label><input type="date" id="sDue"></div>
+
+    <div class="row"><label>입력일자</label><input type="date" id="sDate" disabled title="기록용 (자동 입력)"></div>
+
+    <div class="row"><label>항목</label>
+      <select id="sCat"></select>
+      <button class="btn gray" id="btnCat">+항목</button>
+    </div>
+
+    <div class="row"><label>제목</label><input type="text" id="sTitle" maxlength="100" placeholder="제목 입력"></div>
+
+    <div class="row" style="align-items:flex-start"><label style="padding-top:10px">내용</label>
+      <textarea id="sContent" rows="5" placeholder="내용 입력"></textarea>
+    </div>
+
+    <div class="btns g3">
+      <button class="btn" id="bAdd">추가</button>
+      <button class="btn orange" id="bEdit">수정</button>
+      <button class="btn red" id="bDel">삭제</button>
+      <button class="btn green" id="bDone">완료</button>
+      <button class="btn gray" id="bReset">초기화</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <colgroup><col style="width:27%"><col style="width:23%"><col style="width:50%"></colgroup>
+        <thead><tr><th>마감일</th><th>항목</th><th>제목</th></tr></thead>
+        <tbody id="sBody"></tbody>
+      </table>
+    </div>
+    <p class="note">행을 누르면 위 입력란에 불러옵니다. 정렬: 마감일(미완은 빠른 순, 완료는 최신 순) → 항목 우선순위. 입력일자는 기록용입니다.</p>
+  </div>
+
+  <!-- ================= 당직 관리 ================= -->
+  <div class="page" id="pDuty">
+    <h2>당직 관리</h2>
+
+    <div class="row"><label>당직일자</label><input type="date" id="dDate"></div>
+
+    <div class="row"><label>근무시간</label>
+      <input type="time" id="dStart" value="09:00">
+      <span class="timeSep">~</span>
+      <input type="time" id="dEnd" value="17:00">
+    </div>
+    <div class="row"><label>프리셋</label>
+      <select id="pSel"></select>
+    </div>
+    <div class="btns" style="margin-top:0">
+      <button class="btn gray sm" id="pSave">현재 시간 저장</button>
+      <button class="btn green sm" id="pDefault">기본으로 설정</button>
+      <button class="btn red sm" id="pDel">프리셋 삭제</button>
+    </div>
+
+    <div class="row"><label>당직자</label>
+      <input type="text" id="dName" list="wList" placeholder="이름 입력/선택" maxlength="30">
+      <datalist id="wList"></datalist>
+      <button class="btn gray" id="bAddWorker">+당직자</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="btns" style="margin-top:0"><button class="btn gray sm" id="wOrder">⇅ 당직자 기본 순서 설정</button></div>
+
+    <div class="btns g3">
+      <button class="btn" id="dAdd">추가</button>
+      <button class="btn orange" id="dEdit">수정</button>
+      <button class="btn gray" id="dUp">순서 ▲</button>
+      <button class="btn gray" id="dDown">순서 ▼</button>
+      <button class="btn red" id="dDel">삭제</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <colgroup><col style="width:33%"><col style="width:39%"><col style="width:28%"></colgroup>
+        <thead><tr><th>당직일자</th><th>근무시간</th><th>당직자</th></tr></thead>
+        <tbody id="dBody"></tbody>
+      </table>
+    </div>
+    <p class="note">순서 ▲▼ : 선택한 행의 당직자를 위/아래 행과 맞바꿉니다. (날짜·시간은 그대로)</p>
+
+    <div class="box" style="margin-top:16px">
+      <b style="font-size:13px">📅 당직 일괄 도구</b>
+      <div class="row" style="margin-top:8px"><label style="width:50px">월 선택</label>
+        <input type="month" id="dMonth">
+      </div>
+      <div class="row"><label style="width:50px">시작</label>
+        <select id="dStartWorker"></select>
+        <button class="btn sm" id="dGen">월요일 자동생성</button>
+      </div>
+      <p class="note">선택한 달의 월요일을 '당직자 기본 순서'대로 배정합니다. 시작 당직자를 고르면 그 사람부터, '이어서'를 두면 직전 당직 다음 사람부터 시작합니다. 이미 있는 날짜는 건너뜁니다. 공휴일은 위 '추가'로 직접 넣어주세요.</p>
+      <div class="btns" style="margin:8px 0 0">
+        <button class="btn gray sm" id="dRotate">선택 행부터 이후 순환 재배정</button>
+      </div>
+      <p class="note">선택한 행의 당직자를 기준으로, 그 날짜 이후 모든 행을 당직자 등록 순서대로 다시 배정합니다. (당직자 변경 후 한 달치 순서 조정용)</p>
+    </div>
+  </div>
+</div>
+
+<!-- 항목 관리 모달 -->
+<div class="modal" id="catModal">
+  <div class="card">
+    <h3>항목 관리 / 우선순위</h3>
+    <div class="body">
+      <div class="row" style="margin-bottom:10px">
+        <input type="text" id="newCat" placeholder="새 항목 이름" maxlength="30">
+        <button class="btn" id="catAdd">추가</button>
+      </div>
+      <div id="catList"></div>
+      <p class="note">항목을 누른 뒤 ▲▼ 로 우선순위(위가 높음)를 조정하고 [저장]을 누르세요.</p>
+    </div>
+    <div class="foot">
+      <button class="btn gray sm" id="catUp" style="flex:0 0 52px">▲</button>
+      <button class="btn gray sm" id="catDown" style="flex:0 0 52px">▼</button>
+      <button class="btn red sm" id="catDel" style="flex:0 0 52px">삭제</button>
+      <button class="btn green" id="catSave">저장</button>
+      <button class="btn gray" id="catClose">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 당직자 기본 순서 모달 -->
+<div class="modal" id="wModal">
+  <div class="card">
+    <h3>당직자 기본 순서</h3>
+    <div class="body">
+      <div id="wOrderList"></div>
+      <p class="note">당직자를 누른 뒤 ▲▼ 로 순서를 바꾸고 [저장]을 누르세요. 월요일 자동생성과 재배정은 이 순서를 따릅니다.</p>
+    </div>
+    <div class="foot">
+      <button class="btn gray sm" id="wUp" style="flex:0 0 52px">▲</button>
+      <button class="btn gray sm" id="wDown" style="flex:0 0 52px">▼</button>
+      <button class="btn green" id="wSave">저장</button>
+      <button class="btn gray" id="wClose">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===== Supabase 설정 (본인 값으로 교체) ===== */
+const SUPABASE_URL = 'https://qqmebndptbrvlzlkklxn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_OPDTpDVMK7xwzLcArD7xNw_lWpkXl6x';
+/* ======================================== */
+
+const configured = !SUPABASE_URL.startsWith('YOUR_');
+let sb = null;
+if (configured) sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+else document.getElementById('warn').style.display = 'block';
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const today = () => ymd(new Date());
+const esc = s => (s ?? '').toString().replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dot = s => s ? s.replaceAll('-', '.') : '';
+function fmtT(t) {
+  if (!t) return '';
+  let [h, m] = t.split(':').map(Number);
+  const ap = h < 12 ? '오전' : '오후';
+  h = h % 12 || 12;
+  return `${ap} ${h}:${pad(m)}`;
+}
+let tt;
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2200);
+}
+async function run(q) {
+  if (!sb) { toast('Supabase 설정이 필요합니다'); throw new Error('no config'); }
+  const { data, error } = await q;
+  if (error) { toast('오류: ' + error.message); throw error; }
+  return data;
+}
+
+/* ---------- NEW / 수정 하이라이트 / 알림 공통 ---------- */
+const H24 = 24 * 3600 * 1000;
+const isNew = r => r.created_at && Date.now() - new Date(r.created_at) < H24;
+const recentEdit = r => r.updated_at && Date.now() - new Date(r.updated_at) < H24;
+const hl = (r, f) => (recentEdit(r) && (r.changed_fields || []).includes(f)) ? 'hl' : '';
+const CID = (() => { try { let v = localStorage.getItem('cid'); if (!v) { v = Math.random().toString(36).slice(2); localStorage.setItem('cid', v); } return v; } catch (e) { return 'x' + Math.random(); } })();
+// 수정 시 변경된 필드만 찾고, 24시간 내 이전 수정 필드는 함께 유지
+function editMeta(old, p) {
+  const ch = Object.keys(p).filter(k => (old[k] ?? '') != (p[k] ?? ''));
+  if (!ch.length) return null;
+  const prev = recentEdit(old) ? (old.changed_fields || []) : [];
+  return { changed_fields: [...new Set([...prev, ...ch])], updated_at: new Date().toISOString(), updated_by: CID };
+}
+// 알림 형식: 1줄 "교회 스케줄 알림. (추가)" / 2줄 제목 / 3줄 내용
+async function notify(head, line2, line3) {
+  const body = [line2, line3].filter(Boolean).join('\n');
+  const t = $('toast'); t.style.whiteSpace = 'pre-line'; t.style.textAlign = 'left';
+  toast(head + '\n' + body);
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
+    const opt = { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'church-' + Date.now() };
+    // 안드로이드 크롬은 new Notification()을 지원하지 않아 서비스워커로 띄웁니다
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) return reg.showNotification(head, opt);
+    }
+    new Notification(head, opt);
+  } catch (e) {}
+}
+const clip = (s, n = 80) => { s = (s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; };
+$('bell').onclick = async () => {
+  if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않습니다 (크롬에서 설치한 앱으로 열어보세요)');
+  const r = await Notification.requestPermission();
+  if (r !== 'granted') return toast('알림이 차단되었습니다. 브라우저 사이트 설정에서 알림을 허용해주세요');
+  toast('알림이 허용되었습니다. 3초 뒤 테스트 알림을 보냅니다 (앱을 닫거나 다른 화면으로 나가보세요)');
+  setTimeout(async () => {
+    try {
+      const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+      const opt = { body: '테스트 제목\n테스트 내용', icon: 'icon-192.png', tag: 'church-test' };
+      if (reg) reg.showNotification('교회 스케줄 알림. (테스트)', opt); else new Notification('교회 스케줄 알림. (테스트)', opt);
+    } catch (e) { toast('알림 표시 실패: ' + e.message); }
+  }, 3000);
+};
+let rtTimer;
+function startRealtime() {
+  if (!sb) return;
+  const refresh = t => { clearTimeout(rtTimer); rtTimer = setTimeout(() => { t === 'schedules' ? loadSch() : loadDuty(); }, 300); };
+  sb.channel('rt-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, pl => {
+      refresh('schedules');
+      const r = pl.new || {};
+      if (pl.eventType === 'DELETE' || r.updated_by === CID) return;
+      let act = '추가';
+      if (pl.eventType === 'UPDATE') {
+        const edited = r.updated_at && Date.now() - new Date(r.updated_at) < 15000;
+        act = edited ? '수정' : (r.done ? '완료' : '완료 해제');
+      }
+      notify(`교회 스케줄 알림. (${act})`, r.title, clip(r.content));
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'duty_schedule' }, pl => {
+      refresh('duty');
+      const r = pl.new || {};
+      if (pl.eventType === 'DELETE' || r.updated_by === CID) return;
+      notify(`교회 당직 알림. (${pl.eventType === 'INSERT' ? '추가' : '수정'})`,
+        dot(r.duty_date || ''), `${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}  ${r.worker_name || ''}`);
+    })
+    .subscribe();
+}
+setInterval(() => { renderSch(); renderDuty(); }, 60000); // 24시간 경과 시 NEW/하이라이트 자동 해제
+
+/* ---------- 탭 ---------- */
+$('mainTabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#mainTabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === b.dataset.p));
+  if (b.dataset.p === 'pDuty') loadDuty();
+});
+let tab = 'todo';
+$('subTabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  tab = b.dataset.s;
+  document.querySelectorAll('#subTabs button').forEach(x => x.classList.toggle('on', x === b));
+  $('bDone').textContent = tab === 'done' ? '완료 해제' : '완료';
+  $('bDone').className = 'btn ' + (tab === 'done' ? 'orange' : 'green');
+  resetSch(); loadSch();
+});
+
+/* =================== 스케줄 관리 =================== */
+let cats = [], sch = [], selId = null;
+
+async function loadCats() {
+  cats = await run(sb.from('categories').select('*').order('sort_order').order('id'));
+  const cur = $('sCat').value;
+  $('sCat').innerHTML = '<option value="">항목 선택</option>' +
+    cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  $('sCat').value = cur;
+}
+async function loadSch() {
+  if (!sb) { renderSch(); return; }
+  await loadCats();
+  sch = await run(sb.from('schedules').select('*').eq('done', tab === 'done'));
+  renderSch();
+}
+function renderSch() {
+  const order = {}; cats.forEach((c, i) => order[c.id] = i);
+  const rank = r => r.category_id in order ? order[r.category_id] : 9999;
+  const dir = tab === 'done' ? -1 : 1;
+  const dd = r => r.due_date || (dir === 1 ? '9999-12-31' : '0000-00-00'); // 마감일 없는 옛 데이터는 맨 뒤
+  const rows = [...sch].sort((a, b) =>
+    dir * dd(a).localeCompare(dd(b)) || rank(a) - rank(b) || a.id - b.id);
+  const nm = id => (cats.find(c => c.id === id) || {}).name || '';
+  const t = today();
+  $('sBody').innerHTML = rows.length ? rows.map(r => `
+    <tr data-id="${r.id}" class="${r.id === selId ? 'sel' : ''} ${tab === 'todo' && r.due_date && r.due_date < t ? 'late' : ''}">
+      <td class="c due ${hl(r,'due_date')}">${dot(r.due_date)}</td>
+      <td class="c ${hl(r,'category_id')}">${esc(nm(r.category_id))}</td>
+      <td class="ct ${hl(r,'title') || hl(r,'content')}">${isNew(r) ? '<span class="nw">NEW</span>' : ''}${esc(r.title)}</td>
+    </tr>`).join('') : '<tr><td colspan="3" class="empty">등록된 내용이 없습니다</td></tr>';
+}
+$('sBody').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
+  const r = sch.find(x => x.id == tr.dataset.id); if (!r) return;
+  selId = r.id;
+  $('sDate').value = r.input_date;
+  $('sCat').value = r.category_id ?? '';
+  $('sTitle').value = r.title;
+  $('sContent').value = r.content ?? '';
+  $('sDue').value = r.due_date || today();
+  renderSch();
+});
+function resetSch() {
+  selId = null;
+  $('sDate').value = today();
+  $('sCat').value = '';
+  $('sTitle').value = ''; $('sContent').value = '';
+  $('sDue').value = today();
+  renderSch();
+}
+// 입력일자(input_date)는 기록용: 추가 때만 오늘 날짜로 저장하고, 수정 때는 건드리지 않음
+function schPayload() {
+  const title = $('sTitle').value.trim();
+  if (!title) { toast('제목을 입력하세요'); return null; }
+  if (!$('sDue').value) { toast('마감일을 선택하세요'); return null; }
+  return {
+    category_id: $('sCat').value ? Number($('sCat').value) : null,
+    title, content: $('sContent').value,
+    due_date: $('sDue').value
+  };
+}
+function needSel() { if (!selId) { toast('표에서 행을 먼저 선택하세요'); return false; } return true; }
+
+$('bAdd').onclick = async () => {
+  const p = schPayload(); if (!p) return;
+  p.updated_by = CID;
+  p.input_date = today();
+  if (tab === 'done') { p.done = true; p.done_at = new Date().toISOString(); }
+  await run(sb.from('schedules').insert(p));
+  toast('추가되었습니다'); resetSch(); loadSch();
+};
+$('bEdit').onclick = async () => {
+  if (!needSel()) return;
+  const p = schPayload(); if (!p) return;
+  const meta = editMeta(sch.find(x => x.id === selId), p);
+  if (!meta) return toast('변경된 내용이 없습니다');
+  await run(sb.from('schedules').update({ ...p, ...meta }).eq('id', selId));
+  toast('수정되었습니다'); resetSch(); loadSch();
+};
+$('bDel').onclick = async () => {
+  if (!needSel()) return;
+  if (!confirm('선택한 내용을 삭제할까요?')) return;
+  await run(sb.from('schedules').delete().eq('id', selId));
+  toast('삭제되었습니다'); resetSch(); loadSch();
+};
+$('bDone').onclick = async () => {
+  if (!needSel()) return;
+  const toDone = tab === 'todo';
+  await run(sb.from('schedules').update({ done: toDone, done_at: toDone ? new Date().toISOString() : null, updated_by: CID }).eq('id', selId));
+  toast(toDone ? '완료 처리되었습니다' : '완료가 해제되었습니다'); resetSch(); loadSch();
+};
+$('bReset').onclick = resetSch;
+
+/* ---------- 항목 관리 모달 ---------- */
+let work = [], catSel = null;
+function renderCatModal() {
+  $('catList').innerHTML = work.length ? work.map((c, i) => `
+    <div class="item ${i === catSel ? 'sel' : ''}" data-i="${i}">
+      <b style="color:#999;width:22px">${i + 1}</b><span>${esc(c.name)}</span>
+    </div>`).join('') : '<div class="empty">등록된 항목이 없습니다</div>';
+}
+$('btnCat').onclick = () => {
+  if (!sb) return toast('Supabase 설정이 필요합니다');
+  work = cats.map(c => ({ id: c.id, name: c.name })); catSel = null;
+  renderCatModal(); $('catModal').classList.add('on');
+};
+$('catClose').onclick = () => $('catModal').classList.remove('on');
+$('catList').addEventListener('click', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  catSel = Number(it.dataset.i); renderCatModal();
+});
+$('catAdd').onclick = () => {
+  const n = $('newCat').value.trim(); if (!n) return;
+  if (work.some(c => c.name === n)) return toast('이미 있는 항목입니다');
+  work.push({ id: null, name: n }); $('newCat').value = '';
+  catSel = work.length - 1; renderCatModal();
+};
+function moveCat(d) {
+  if (catSel === null) return toast('항목을 선택하세요');
+  const j = catSel + d; if (j < 0 || j >= work.length) return;
+  [work[catSel], work[j]] = [work[j], work[catSel]]; catSel = j; renderCatModal();
+}
+$('catUp').onclick = () => moveCat(-1);
+$('catDown').onclick = () => moveCat(1);
+$('catDel').onclick = () => {
+  if (catSel === null) return toast('항목을 선택하세요');
+  if (!confirm('이 항목을 삭제할까요? (해당 항목의 스케줄은 항목이 비워집니다)')) return;
+  work.splice(catSel, 1); catSel = null; renderCatModal();
+};
+$('catSave').onclick = async () => {
+  try {
+    const keep = work.filter(c => c.id).map(c => c.id);
+    const del = cats.filter(c => !keep.includes(c.id)).map(c => c.id);
+    if (del.length) await run(sb.from('categories').delete().in('id', del));
+    for (let i = 0; i < work.length; i++) {
+      const c = work[i];
+      if (c.id) await run(sb.from('categories').update({ sort_order: i }).eq('id', c.id));
+      else await run(sb.from('categories').insert({ name: c.name, sort_order: i }));
+    }
+    toast('저장되었습니다');
+    $('catModal').classList.remove('on');
+    loadSch();
+  } catch (e) { /* run()에서 토스트 표시 */ }
+};
+
+/* =================== 당직 관리 =================== */
+let workers = [], duties = [], dSel = null, presets = [], presetInit = false;
+
+async function loadDuty() {
+  if (!sb) { renderDuty(); return; }
+  workers = await run(sb.from('duty_workers').select('*').order('sort_order').order('id'));
+  duties = await run(sb.from('duty_schedule').select('*').order('duty_date').order('id'));
+  await loadPresets();
+  renderWorkers(); renderDuty();
+}
+
+/* ---------- 근무시간 프리셋 ---------- */
+const pLabel = p => `${p.is_default ? '★ ' : ''}${p.name} (${fmtT(p.start_time)}~${fmtT(p.end_time)})`;
+async function loadPresets() {
+  try {
+    presets = await run(sb.from('duty_presets').select('*').order('id'));
+  } catch (e) { presets = []; return; }   // 테이블이 아직 없으면 토스트로 안내됨
+  const cur = $('pSel').value;
+  $('pSel').innerHTML = '<option value="">프리셋 선택</option>' +
+    presets.map(p => `<option value="${p.id}">${esc(pLabel(p))}</option>`).join('');
+  $('pSel').value = cur;
+  // 앱을 처음 열 때 한 번만 기본 프리셋을 시간 칸에 적용
+  if (!presetInit) {
+    presetInit = true;
+    const d = presets.find(p => p.is_default);
+    if (d) { $('dStart').value = d.start_time; $('dEnd').value = d.end_time; $('pSel').value = d.id; }
+  }
+}
+$('pSel').addEventListener('change', () => {
+  const p = presets.find(x => String(x.id) === $('pSel').value);
+  if (p) { $('dStart').value = p.start_time; $('dEnd').value = p.end_time; }
+});
+$('pSave').onclick = async () => {
+  const s = $('dStart').value, e = $('dEnd').value;
+  if (!s || !e) return toast('근무시간을 입력하세요');
+  const name = (prompt('프리셋 이름을 입력하세요 (예: 평일, 공휴일)', '') || '').trim();
+  if (!name) return;
+  if (presets.some(p => p.name === name)) {
+    if (!confirm(`'${name}' 프리셋이 있습니다. 현재 시간으로 덮어쓸까요?`)) return;
+    await run(sb.from('duty_presets').update({ start_time: s, end_time: e }).eq('name', name));
+  } else {
+    await run(sb.from('duty_presets').insert({ name, start_time: s, end_time: e, is_default: presets.length === 0 }));
+  }
+  toast('프리셋이 저장되었습니다'); await loadPresets();
+  const p = presets.find(x => x.name === name); if (p) $('pSel').value = p.id;
+};
+$('pDefault').onclick = async () => {
+  const id = $('pSel').value; if (!id) return toast('프리셋을 선택하세요');
+  await run(sb.from('duty_presets').update({ is_default: false }).neq('id', id));
+  await run(sb.from('duty_presets').update({ is_default: true }).eq('id', id));
+  toast('기본 프리셋으로 설정되었습니다'); loadPresets();
+};
+$('pDel').onclick = async () => {
+  const id = $('pSel').value; if (!id) return toast('프리셋을 선택하세요');
+  if (!confirm('이 프리셋을 삭제할까요?')) return;
+  await run(sb.from('duty_presets').delete().eq('id', id));
+  $('pSel').value = ''; toast('삭제되었습니다'); loadPresets();
+};
+function renderWorkers() {
+  const cur = $('dStartWorker').value;
+  $('dStartWorker').innerHTML = '<option value="">이어서 (직전 당직 다음)</option>' +
+    workers.map((w, i) => `<option value="${w.id}">${i + 1}. ${esc(w.name)}부터</option>`).join('');
+  $('dStartWorker').value = cur;
+  $('wList').innerHTML = workers.map(w => `<option value="${esc(w.name)}">`).join('');
+  $('chips').innerHTML = workers.length ? workers.map((w, i) =>
+    `<span class="chip" data-n="${esc(w.name)}"><span class="t">${i + 1}. ${esc(w.name)}</span><b data-del="${w.id}">×</b></span>`).join('')
+    : '<span class="note" style="grid-column:1/-1">등록된 당직자가 없습니다. 이름 입력 후 [+당직자]</span>';
+}
+function renderDuty() {
+  $('dBody').innerHTML = duties.length ? duties.map(r => `
+    <tr data-id="${r.id}" class="${r.id === dSel ? 'sel' : ''}">
+      <td class="w ${hl(r,'duty_date')}">${isNew(r) ? '<span class="nw">NEW</span>' : ''}${dot(r.duty_date)}</td>
+      <td class="w ${hl(r,'start_time') || hl(r,'end_time')}">${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}</td>
+      <td class="w ${hl(r,'worker_name')}">${esc(r.worker_name)}</td>
+    </tr>`).join('') : '<tr><td colspan="3" class="empty">등록된 당직이 없습니다</td></tr>';
+}
+$('chips').addEventListener('click', async e => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    if (!confirm('이 당직자를 명단에서 삭제할까요? (등록된 당직 일정은 유지됩니다)')) return;
+    await run(sb.from('duty_workers').delete().eq('id', del.dataset.del));
+    toast('삭제되었습니다'); loadDuty(); return;
+  }
+  const chip = e.target.closest('.chip'); if (chip) $('dName').value = chip.dataset.n;
+});
+$('bAddWorker').onclick = async () => {
+  const n = $('dName').value.trim(); if (!n) return toast('당직자 이름을 입력하세요');
+  if (workers.some(w => w.name === n)) return toast('이미 등록된 당직자입니다');
+  await run(sb.from('duty_workers').insert({ name: n, sort_order: workers.length }));
+  toast('당직자가 등록되었습니다'); loadDuty();
+};
+$('dBody').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
+  const r = duties.find(x => x.id == tr.dataset.id); if (!r) return;
+  dSel = r.id;
+  $('dDate').value = r.duty_date; $('dStart').value = r.start_time;
+  $('dEnd').value = r.end_time; $('dName').value = r.worker_name;
+  renderDuty();
+});
+function dutyPayload() {
+  const p = { duty_date: $('dDate').value, start_time: $('dStart').value, end_time: $('dEnd').value, worker_name: $('dName').value.trim() };
+  if (!p.duty_date) { toast('당직일자를 선택하세요'); return null; }
+  if (!p.start_time || !p.end_time) { toast('근무시간을 입력하세요'); return null; }
+  if (!p.worker_name) { toast('당직자를 입력하세요'); return null; }
+  return p;
+}
+function needDSel() { if (!dSel) { toast('표에서 행을 먼저 선택하세요'); return false; } return true; }
+
+$('dAdd').onclick = async () => {
+  const p = dutyPayload(); if (!p) return;
+  p.updated_by = CID;
+  await run(sb.from('duty_schedule').insert(p));
+  toast('추가되었습니다'); dSel = null; loadDuty();
+};
+$('dEdit').onclick = async () => {
+  if (!needDSel()) return;
+  const p = dutyPayload(); if (!p) return;
+  const meta = editMeta(duties.find(x => x.id === dSel), p);
+  if (!meta) return toast('변경된 내용이 없습니다');
+  await run(sb.from('duty_schedule').update({ ...p, ...meta }).eq('id', dSel));
+  toast('수정되었습니다'); loadDuty();
+};
+$('dDel').onclick = async () => {
+  if (!needDSel()) return;
+  if (!confirm('선택한 당직 일정을 삭제할까요?')) return;
+  await run(sb.from('duty_schedule').delete().eq('id', dSel));
+  toast('삭제되었습니다'); dSel = null; loadDuty();
+};
+async function moveDuty(d) {
+  if (!needDSel()) return;
+  const i = duties.findIndex(x => x.id === dSel), j = i + d;
+  if (j < 0 || j >= duties.length) return toast(d < 0 ? '맨 위입니다' : '맨 아래입니다');
+  const a = duties[i], b = duties[j];
+  await Promise.all([
+    run(sb.from('duty_schedule').update({ worker_name: b.worker_name, ...editMeta(a, { worker_name: b.worker_name }) }).eq('id', a.id)),
+    run(sb.from('duty_schedule').update({ worker_name: a.worker_name, ...editMeta(b, { worker_name: a.worker_name }) }).eq('id', b.id))
+  ]);
+  // 선택은 '위치' 기준으로 따라가도록 이동한 행 id 유지 (날짜 고정, 당직자만 교환)
+  dSel = b.id;
+  await loadDuty();
+  toast('당직자를 교환했습니다');
+}
+$('dUp').onclick = () => moveDuty(-1);
+$('dDown').onclick = () => moveDuty(1);
+
+/* 당직자 기본 순서 설정 */
+let wWork = [], wSel = null;
+function renderWModal() {
+  $('wOrderList').innerHTML = wWork.length ? wWork.map((w, i) => `
+    <div class="item ${i === wSel ? 'sel' : ''}" data-i="${i}">
+      <b style="color:#999;width:22px">${i + 1}</b><span>${esc(w.name)}</span>
+    </div>`).join('') : '<div class="empty">등록된 당직자가 없습니다</div>';
+}
+$('wOrder').onclick = () => {
+  if (!sb) return toast('Supabase 설정이 필요합니다');
+  if (!workers.length) return toast('먼저 당직자를 등록하세요');
+  wWork = workers.map(w => ({ id: w.id, name: w.name })); wSel = null;
+  renderWModal(); $('wModal').classList.add('on');
+};
+$('wClose').onclick = () => $('wModal').classList.remove('on');
+$('wOrderList').addEventListener('click', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  wSel = Number(it.dataset.i); renderWModal();
+});
+function moveW(d) {
+  if (wSel === null) return toast('당직자를 선택하세요');
+  const j = wSel + d; if (j < 0 || j >= wWork.length) return;
+  [wWork[wSel], wWork[j]] = [wWork[j], wWork[wSel]]; wSel = j; renderWModal();
+}
+$('wUp').onclick = () => moveW(-1);
+$('wDown').onclick = () => moveW(1);
+$('wSave').onclick = async () => {
+  try {
+    await Promise.all(wWork.map((w, i) => run(sb.from('duty_workers').update({ sort_order: i }).eq('id', w.id))));
+    toast('기본 순서가 저장되었습니다');
+    $('wModal').classList.remove('on');
+    loadDuty();
+  } catch (e) { /* run()에서 토스트 표시 */ }
+};
+
+/* 월요일 자동생성 */
+$('dGen').onclick = async () => {
+  if (!workers.length) return toast('먼저 당직자를 등록하세요');
+  const m = $('dMonth').value; if (!m) return toast('월을 선택하세요');
+  const [y, mo] = m.split('-').map(Number);
+  const first = `${m}-01`;
+  const prev = [...duties].filter(r => r.duty_date < first).pop();
+  const pick = $('dStartWorker').value;
+  let idx;
+  if (pick !== '') idx = workers.findIndex(w => String(w.id) === pick);
+  else idx = prev ? workers.findIndex(w => w.name === prev.worker_name) + 1 : 0;
+  if (idx < 0) idx = 0;
+  const exist = new Set(duties.map(r => r.duty_date));
+  const rows = [];
+  const last = new Date(y, mo, 0).getDate();
+  for (let d = 1; d <= last; d++) {
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getDay() !== 1) continue;
+    const s = ymd(dt);
+    if (exist.has(s)) continue;
+    rows.push({ duty_date: s, start_time: $('dStart').value || '09:00', end_time: $('dEnd').value || '17:00',
+      worker_name: workers[idx % workers.length].name, updated_by: CID });
+    idx++;
+  }
+  if (!rows.length) return toast('생성할 월요일이 없습니다');
+  if (!confirm(`${y}년 ${mo}월 월요일 ${rows.length}건을 생성할까요?`)) return;
+  await run(sb.from('duty_schedule').insert(rows));
+  toast(`${rows.length}건 생성되었습니다`); loadDuty();
+};
+
+/* 선택 행부터 이후 순환 재배정 */
+$('dRotate').onclick = async () => {
+  if (!needDSel()) return;
+  if (!workers.length) return toast('먼저 당직자를 등록하세요');
+  const i = duties.findIndex(x => x.id === dSel);
+  let idx = workers.findIndex(w => w.name === duties[i].worker_name);
+  if (idx < 0) idx = 0;
+  const targets = duties.slice(i);
+  if (!confirm(`선택한 행부터 ${targets.length}건의 당직자를 등록 순서대로 다시 배정할까요?`)) return;
+  await Promise.all(targets.map((r, k) => {
+    const nn = workers[(idx + k) % workers.length].name;
+    if (nn === r.worker_name) return null;
+    return run(sb.from('duty_schedule').update({ worker_name: nn, ...editMeta(r, { worker_name: nn }) }).eq('id', r.id));
+  }));
+  toast('재배정되었습니다'); loadDuty();
+};
+
+/* ---------- 초기화 ---------- */
+$('sDate').value = today();
+$('sDue').value = today();
+$('dDate').value = today();
+$('dMonth').value = today().slice(0, 7);
+renderSch(); renderDuty();
+if (sb) { loadSch(); loadDuty(); startRealtime(); }
+
+/* ---------- PWA: 서비스워커 등록 (https 또는 localhost 에서만 동작) ---------- */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
