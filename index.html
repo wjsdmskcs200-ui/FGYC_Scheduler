@@ -72,6 +72,26 @@ tr.late td.due{color:#e0483e;font-weight:700}
 #toast.on{opacity:.92}
 #warn{background:#fff3cd;color:#7a5b00;padding:10px 14px;font-size:13px;display:none}
 .timeSep{flex:none;font-weight:700}
+body.role-user .mo{display:none!important}
+body.role-user .chip b{display:none}
+#auth{position:fixed;inset:0;z-index:80;background:#f1f4f8;display:none;overflow-y:auto}
+#auth.on{display:block}
+.authbox{max-width:420px;margin:0 auto;background:#fff;min-height:100%;padding-bottom:24px}
+.authbox .logo{background:#1e3a5f;color:#fff;font-size:18px;font-weight:700;text-align:center;padding:16px}
+.authbox form{padding:16px}
+.authbox form input[type=text],.authbox form input[type=password],.authbox form input[type=tel]{margin-bottom:10px}
+.chk{display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-size:14px}
+.authbox .big{width:100%;padding:13px;font-size:16px}
+#aMsg{color:#e0483e;font-size:13px;min-height:18px;margin:10px 0 0;text-align:center}
+.su{display:none}
+#auth.signup .su{display:block}
+.footbar{margin:24px 14px 0;padding-top:14px;border-top:1px solid #e5e9ef;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.footbar .me{flex:1;font-size:12.5px;color:#555;min-width:120px}
+.mem{border:1px solid #d8dee7;border-radius:8px;padding:9px 10px;margin-bottom:8px;font-size:13px}
+.mem .l1{font-weight:700;color:#1e3a5f}
+.mem .l2{color:#666;margin:2px 0 6px}
+.mem .acts{display:flex;gap:6px;align-items:center}
+.mem select{width:auto;padding:6px;font-size:13px}
 .radios{display:flex;gap:18px;flex:1}
 .radios label{display:flex;align-items:center;gap:6px;width:auto;font-size:15px;font-weight:600;color:#1e3a5f}
 .radios input{width:20px;height:20px}
@@ -108,7 +128,7 @@ header{position:relative}
 
     <div class="row"><label>항목</label>
       <select id="sCat"></select>
-      <button class="btn gray" id="btnCat">+항목</button>
+      <button class="btn gray mo" id="btnCat">+항목</button>
     </div>
 
     <div class="row"><label>제목</label><input type="text" id="sTitle" maxlength="100" placeholder="제목 입력"></div>
@@ -117,7 +137,7 @@ header{position:relative}
       <textarea id="sContent" rows="5" placeholder="내용 입력"></textarea>
     </div>
 
-    <div class="btns g3">
+    <div class="btns g3 mo">
       <button class="btn" id="bAdd">추가</button>
       <button class="btn orange" id="bEdit">수정</button>
       <button class="btn red" id="bDel">삭제</button>
@@ -146,10 +166,10 @@ header{position:relative}
       <span class="timeSep">~</span>
       <input type="time" id="dEnd" value="17:00">
     </div>
-    <div class="row"><label>프리셋</label>
+    <div class="row mo"><label>프리셋</label>
       <select id="pSel"></select>
     </div>
-    <div class="btns" style="margin-top:0">
+    <div class="btns mo" style="margin-top:0">
       <button class="btn gray sm" id="pSave">현재 시간 저장</button>
       <button class="btn green sm" id="pDefault">기본으로 설정</button>
       <button class="btn red sm" id="pDel">프리셋 삭제</button>
@@ -158,12 +178,12 @@ header{position:relative}
     <div class="row"><label>당직자</label>
       <input type="text" id="dName" list="wList" placeholder="이름 입력/선택" maxlength="30">
       <datalist id="wList"></datalist>
-      <button class="btn gray" id="bAddWorker">+당직자</button>
+      <button class="btn gray mo" id="bAddWorker">+당직자</button>
     </div>
     <div class="chips" id="chips"></div>
-    <div class="btns" style="margin-top:0"><button class="btn gray sm" id="wOrder">⇅ 당직자 기본 순서 설정</button></div>
+    <div class="btns mo" style="margin-top:0"><button class="btn gray sm" id="wOrder">⇅ 당직자 기본 순서 설정</button></div>
 
-    <div class="btns g3">
+    <div class="btns g3 mo">
       <button class="btn" id="dAdd">추가</button>
       <button class="btn orange" id="dEdit">수정</button>
       <button class="btn gray" id="dUp">순서 ▲</button>
@@ -180,7 +200,7 @@ header{position:relative}
     </div>
     <p class="note">순서 ▲▼ : 선택한 행의 당직자를 위/아래 행과 맞바꿉니다. (날짜·시간은 그대로)</p>
 
-    <div class="box" style="margin-top:16px">
+    <div class="box mo" style="margin-top:16px">
       <b style="font-size:13px">📅 당직 일괄 도구</b>
       <div class="row" style="margin-top:8px"><label style="width:50px">월 선택</label>
         <input type="month" id="dMonth">
@@ -218,14 +238,14 @@ header{position:relative}
     </div>
     <datalist id="prList"></datalist>
 
-    <div class="row"><label>명단 등록</label>
+    <div class="row mo"><label>명단 등록</label>
       <input type="text" id="prNew" placeholder="새 담당자 이름" maxlength="30">
       <button class="btn gray" id="prAddWorker">+담당자</button>
     </div>
     <div class="chips" id="prChips"></div>
-    <div class="btns" style="margin-top:0"><button class="btn gray sm" id="prOrder">⇅ 담당자 기본 순서 설정</button></div>
+    <div class="btns mo" style="margin-top:0"><button class="btn gray sm" id="prOrder">⇅ 담당자 기본 순서 설정</button></div>
 
-    <div class="btns g3">
+    <div class="btns g3 mo">
       <button class="btn" id="prAdd">추가</button>
       <button class="btn orange" id="prEdit">수정</button>
       <button class="btn gray" id="prUp">순서 ▲</button>
@@ -243,7 +263,7 @@ header{position:relative}
     <p class="note">오늘 이후 일정만 표시됩니다. 순서 ▲▼ : 선택한 행의 담당자를 위/아래 행과 맞바꿉니다. (날짜는 그대로)</p>
     <div class="btns" style="margin-top:6px"><button class="btn gray sm" id="prPast">🕘 지난 2주 보기</button></div>
 
-    <div class="box" style="margin-top:12px">
+    <div class="box mo" style="margin-top:12px">
       <b style="font-size:13px">📅 기도 담당 일괄 도구</b>
       <div class="row" style="margin-top:8px"><label style="width:50px">기간</label>
         <input type="date" id="prFrom"><span class="timeSep">~</span><input type="date" id="prTo">
@@ -258,6 +278,47 @@ header{position:relative}
       </div>
       <p class="note">선택한 행의 담당자1을 기준으로, 이후 모든 행을 기본 순서대로 2명씩 다시 배정합니다.</p>
     </div>
+  </div>
+
+  <div class="footbar">
+    <span class="me" id="meInfo"></span>
+    <button class="btn gray sm" id="btnMembers" style="display:none">회원 관리</button>
+    <button class="btn red sm" id="btnLogout">로그아웃</button>
+  </div>
+</div>
+
+<!-- 로그인 / 회원가입 화면 -->
+<div id="auth">
+  <div class="authbox">
+    <div class="logo">순복음 영산교회</div>
+    <div class="tabs" id="authTabs">
+      <button class="on" data-m="login" type="button">로그인</button>
+      <button data-m="signup" type="button">회원가입</button>
+    </div>
+    <form id="authForm" autocomplete="on">
+      <input type="text" id="aId" name="username" autocomplete="username" placeholder="아이디" maxlength="30" autocapitalize="none" autocorrect="off">
+      <input type="password" id="aPw" name="password" autocomplete="current-password" placeholder="비밀번호">
+      <div class="su">
+        <input type="password" id="aPw2" autocomplete="new-password" placeholder="비밀번호 확인">
+        <input type="text" id="aPos" placeholder="직분 (예: 집사, 권사, 장로)" maxlength="20">
+        <input type="tel" id="aTel" placeholder="전화번호 (예: 010-0000-0000)" maxlength="20">
+      </div>
+      <label class="chk"><input type="checkbox" id="aAuto" checked> 자동 로그인</label>
+      <button class="btn big" id="aSubmit" type="submit">로그인</button>
+      <p id="aMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- 회원 관리 모달 (마스터 전용) -->
+<div class="modal" id="memModal">
+  <div class="card">
+    <h3>회원 관리</h3>
+    <div class="body">
+      <div id="memList"></div>
+      <p class="note">권한 1 = 마스터(모든 기능), 2 = 유저(조회만). 마스터는 최소 1명이 있어야 합니다.</p>
+    </div>
+    <div class="foot"><button class="btn gray" id="memClose">닫기</button></div>
   </div>
 </div>
 
@@ -342,7 +403,22 @@ const SUPABASE_KEY = 'sb_publishable_OPDTpDVMK7xwzLcArD7xNw_lWpkXl6x';
 
 const configured = !SUPABASE_URL.startsWith('YOUR_');
 let sb = null;
-if (configured) sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* 로그인 토큰: 자동 로그인 ON 이면 localStorage, OFF 이면 sessionStorage(브라우저를 닫으면 로그아웃) */
+const store = {
+  get() { try { return localStorage.getItem('sess') || sessionStorage.getItem('sess'); } catch (e) { return null; } },
+  set(tok, persist) { try { localStorage.removeItem('sess'); sessionStorage.removeItem('sess'); (persist ? localStorage : sessionStorage).setItem('sess', tok); } catch (e) {} },
+  clear() { try { localStorage.removeItem('sess'); sessionStorage.removeItem('sess'); } catch (e) {} }
+};
+let TOKEN = store.get();
+// 모든 DB 요청에 로그인 토큰을 헤더로 실어 보냄 (DB 쪽에서 마스터 여부를 확인)
+const authFetch = (url, opt = {}) => {
+  const h = new Headers(opt.headers || {});
+  if (TOKEN) h.set('x-session-token', TOKEN);
+  return fetch(url, { ...opt, headers: h });
+};
+if (configured) sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  global: { fetch: authFetch }, auth: { persistSession: false, autoRefreshToken: false }
+});
 else document.getElementById('warn').style.display = 'block';
 
 const $ = id => document.getElementById(id);
@@ -1038,6 +1114,149 @@ $('dRotate').onclick = async () => {
   toast('재배정되었습니다'); loadDuty();
 };
 
+/* =================== 로그인 / 회원가입 / 권한 =================== */
+let ME = null, appStarted = false, authMode = 'login';
+const isMaster = () => !!ME && ME.role_id === 1;
+async function rpc(fn, args) {
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw error;
+  return data;
+}
+const authMsg = m => { $('aMsg').textContent = m || ''; };
+
+// 유저(2): 버튼(.mo)을 숨기고 입력칸은 읽기 전용 → 표 조회만 가능
+function applyRole() {
+  const ro = !!ME && !isMaster();
+  document.body.classList.toggle('role-user', ro);
+  document.querySelectorAll('#pSch input,#pSch select,#pSch textarea,#pDuty input,#pDuty select,#pPray input,#pPray select').forEach(el => {
+    if (el.type === 'radio') return;               // 새벽/저녁 구분 보기는 유저도 사용
+    if (ro) {
+      if (el.tagName === 'TEXTAREA' || el.type === 'text') { if (!el.readOnly) { el.readOnly = true; el.dataset.ro = '1'; } }
+      else if (!el.disabled) { el.disabled = true; el.dataset.rd = '1'; }
+    } else {
+      if (el.dataset.ro) { el.readOnly = false; delete el.dataset.ro; }
+      if (el.dataset.rd) { el.disabled = false; delete el.dataset.rd; }
+    }
+  });
+  $('meInfo').textContent = ME ? `👤 ${ME.login_id}${ME.position ? ' · ' + ME.position : ''} · ${ME.role_name}` : '';
+  $('btnMembers').style.display = isMaster() ? '' : 'none';
+}
+function enterApp() {
+  $('auth').classList.remove('on');
+  applyRole();
+  loadSch(); loadDuty();
+  if (!appStarted) { appStarted = true; startRealtime(); }
+}
+function setAuthMode(m) {
+  authMode = m;
+  $('auth').classList.toggle('signup', m === 'signup');
+  document.querySelectorAll('#authTabs button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  $('aSubmit').textContent = m === 'signup' ? '회원가입' : '로그인';
+  $('aPw').autocomplete = m === 'signup' ? 'new-password' : 'current-password';
+  authMsg('');
+}
+function showAuth(mode) {
+  setAuthMode(mode || 'login');
+  try { $('aId').value = localStorage.getItem('lastId') || ''; } catch (e) {}
+  $('aPw').value = ''; $('aPw2').value = '';
+  $('auth').classList.add('on');
+}
+$('authTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setAuthMode(b.dataset.m); });
+$('authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!sb) return authMsg('Supabase 설정이 필요합니다');
+  const id = $('aId').value.trim(), pw = $('aPw').value;
+  if (!id || !pw) return authMsg('아이디와 비밀번호를 입력하세요');
+  $('aSubmit').disabled = true; authMsg('');
+  try {
+    let res;
+    if (authMode === 'signup') {
+      if (pw !== $('aPw2').value) throw new Error('비밀번호 확인이 일치하지 않습니다');
+      res = await rpc('app_signup', { p_id: id, p_pw: pw, p_position: $('aPos').value.trim(), p_phone: $('aTel').value.trim() });
+    } else {
+      res = await rpc('app_login', { p_id: id, p_pw: pw });
+    }
+    TOKEN = res.token; store.set(res.token, $('aAuto').checked);
+    try { localStorage.setItem('lastId', id); } catch (e2) {}
+    ME = res; enterApp();
+    toast(authMode === 'signup' ? (res.role_id === 1 ? '가입 완료! 첫 가입자라 마스터 권한이 부여되었습니다' : '가입이 완료되었습니다') : `${res.login_id}님 환영합니다`);
+  } catch (err) {
+    authMsg(err.message || '처리하지 못했습니다');
+  } finally { $('aSubmit').disabled = false; }
+});
+$('btnLogout').onclick = async () => {
+  if (!confirm('로그아웃할까요?')) return;
+  try { await rpc('app_logout'); } catch (e) {}
+  store.clear(); location.reload();
+};
+
+// 앱을 열 때: 저장된 토큰으로 자동 로그인
+async function boot() {
+  if (!sb) return;
+  if (TOKEN) {
+    try {
+      ME = await rpc('app_me');
+      if (!ME) { TOKEN = null; store.clear(); }   // 만료/삭제된 토큰
+    } catch (e) { ME = null; showAuth('login'); authMsg('서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 새로고침하세요'); return; }
+  }
+  if (ME) enterApp(); else showAuth('login');
+}
+// 앱으로 돌아올 때마다 로그인/권한 상태 재확인 (만료·권한 변경 반영)
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden || !ME || !sb) return;
+  try {
+    const m = await rpc('app_me');
+    if (!m) { store.clear(); location.reload(); return; }
+    const changed = m.role_id !== ME.role_id;
+    ME = m; if (changed) applyRole();
+  } catch (e) {}
+});
+
+/* ---- 회원 관리 (마스터) ---- */
+async function loadMembers() {
+  let list;
+  try { list = await rpc('app_list_members'); } catch (e) { return toast('오류: ' + e.message); }
+  $('memList').innerHTML = list.map(m => `
+    <div class="mem" data-id="${m.id}">
+      <div class="l1">${esc(m.login_id)}${m.position ? ' (' + esc(m.position) + ')' : ''}${m.id === ME.id ? ' · 나' : ''}</div>
+      <div class="l2">${esc(m.phone || '전화번호 없음')}</div>
+      <div class="acts">
+        <select data-act="role">
+          <option value="1" ${m.role_id === 1 ? 'selected' : ''}>1 마스터</option>
+          <option value="2" ${m.role_id === 2 ? 'selected' : ''}>2 유저</option>
+        </select>
+        <button class="btn gray sm" data-act="pw">비번 초기화</button>
+        <button class="btn red sm" data-act="del">삭제</button>
+      </div>
+    </div>`).join('');
+}
+async function refreshMe() {
+  try { const m = await rpc('app_me'); if (m) { ME = m; applyRole(); if (!isMaster()) $('memModal').classList.remove('on'); } } catch (e) {}
+}
+$('btnMembers').onclick = async () => { await loadMembers(); $('memModal').classList.add('on'); };
+$('memClose').onclick = () => $('memModal').classList.remove('on');
+$('memList').addEventListener('change', async e => {
+  const s = e.target.closest('select[data-act=role]'); if (!s) return;
+  const id = Number(s.closest('.mem').dataset.id);
+  try { await rpc('app_set_role', { p_member_id: id, p_role_id: Number(s.value) }); toast('권한이 변경되었습니다'); }
+  catch (err) { toast('오류: ' + err.message); }
+  await loadMembers(); refreshMe();
+});
+$('memList').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const id = Number(b.closest('.mem').dataset.id);
+  try {
+    if (b.dataset.act === 'pw') {
+      const pw = prompt('새 비밀번호를 입력하세요 (4자 이상)\n※ 해당 회원은 다시 로그인해야 합니다'); if (!pw) return;
+      await rpc('app_reset_password', { p_member_id: id, p_new_pw: pw }); toast('비밀번호가 초기화되었습니다');
+    } else if (b.dataset.act === 'del') {
+      if (!confirm('이 회원을 삭제할까요?')) return;
+      await rpc('app_delete_member', { p_member_id: id }); toast('삭제되었습니다');
+    }
+  } catch (err) { toast('오류: ' + err.message); }
+  loadMembers();
+});
+
 /* ---------- 초기화 ---------- */
 $('sDate').value = today();
 $('sDue').value = today();
@@ -1045,7 +1264,7 @@ $('dDate').value = today();
 $('prDate').value = today(); $('prFrom').value = today(); $('prTo').value = ymd(addDays(13));
 $('dMonth').value = today().slice(0, 7);
 renderSch(); renderDuty();
-if (sb) { loadSch(); loadDuty(); startRealtime(); }
+boot();   // 저장된 로그인 토큰으로 자동 로그인 (없으면 로그인 화면)
 
 /* ---------- PWA: 서비스워커 등록 (https 또는 localhost 에서만 동작) ---------- */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
