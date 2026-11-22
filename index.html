@@ -1,413 +1,364 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#1e3a5f">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#3b5bdb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="영산교회">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>순복음 영산교회</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;overflow-x:hidden;font-family:-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;background:#f1f4f8;color:#222;font-size:15px}
-.wrap{max-width:720px;margin:0 auto;min-height:100vh;background:#fff;padding-bottom:40px}
-header{background:#1e3a5f;color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;font-size:18px;font-weight:700;text-align:center}
-.tabs{display:flex}
-.tabs button{flex:1;padding:12px 0;border:0;background:#e6ebf2;font-size:15px;font-weight:600;color:#555;border-bottom:3px solid transparent}
-.tabs button.on{background:#fff;color:#1e3a5f;border-bottom-color:#1e3a5f}
-.sub button{font-size:14px;padding:10px 0}
-.sub{background:#f7f9fc}
-.sub button.on{border-bottom-color:#2f80ed;color:#2f80ed}
-.page{display:none;padding:14px}
-.page.on{display:block}
-h2{margin:0 0 12px;font-size:17px;color:#1e3a5f;text-align:center}
-.row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.row>label{width:64px;flex:none;font-weight:600;font-size:13px;color:#444}
-input,select,textarea{width:100%;min-width:0;padding:10px;border:1px solid #c9d1dc;border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
-input:disabled{background:#eceff3;color:#999}
-input[type=checkbox]{width:22px;height:22px;flex:none}
-textarea{resize:none}
-button{font-family:inherit}
-.btn{padding:10px 12px;border:0;border-radius:8px;font-size:14px;font-weight:600;background:#2f80ed;color:#fff;white-space:nowrap}
-.btn.gray{background:#6b7785}.btn.red{background:#e0483e}.btn.green{background:#27ae60}.btn.orange{background:#f2994a}
-.btn.sm{padding:6px 10px;font-size:12px}
-.btns{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
-.btns .btn{flex:1;min-width:56px}
-.btns.g3{display:grid;grid-template-columns:repeat(3,1fr)}
-.btns.g3 .btn{min-width:0}
-.tbl-wrap{overflow-x:auto;border:1px solid #d8dee7;border-radius:8px}
-table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px}
-th{background:#1e3a5f;color:#fff;padding:8px 6px;white-space:nowrap;position:sticky;top:0}
-td{padding:8px 6px;border-top:1px solid #e5e9ef;vertical-align:top}
-td.c{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-td.ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-td.w{word-break:keep-all}
-tr.sel td{background:#dcebff}
-tr.late td.due{color:#e0483e;font-weight:700}
-.empty{text-align:center;color:#999;padding:24px}
-.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:0 0 12px}
-.chip{background:#e8f0fb;color:#1e3a5f;border-radius:16px;padding:5px 6px 5px 12px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
-.chip .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chip b{width:20px;height:20px;border-radius:50%;background:#c9d6ea;text-align:center;line-height:20px;font-size:12px}
-.box{background:#f7f9fc;border:1px dashed #b9c4d3;border-radius:8px;padding:10px;margin-bottom:14px}
-.box .row{margin-bottom:8px}
-.note{font-size:12px;color:#777;margin:4px 0 0}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
-.modal.on{display:flex}
-.card{background:#fff;border-radius:12px;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column}
-.card h3{margin:0;padding:14px;font-size:16px;color:#1e3a5f;border-bottom:1px solid #e5e9ef}
-.card .body{padding:12px 14px;overflow-y:auto}
-.card .foot{padding:12px 14px;border-top:1px solid #e5e9ef;display:flex;gap:8px}
-.card .foot .btn{flex:1}
-.item{display:flex;align-items:center;gap:6px;padding:9px 10px;border:1px solid #d8dee7;border-radius:8px;margin-bottom:6px}
-.item.sel{background:#dcebff;border-color:#2f80ed}
-.item span{flex:1}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:99;max-width:90%}
-#toast.on{opacity:.92}
-#warn{background:#fff3cd;color:#7a5b00;padding:10px 14px;font-size:13px;display:none}
-.timeSep{flex:none;font-weight:700}
+:root{
+  color-scheme:light dark;
+  --bg:#f5f3ee; --surface:#ffffff; --surface2:#faf9f6; --ink:#1d2130; --muted:#6b7183; --line:#e6e2d8;
+  --accent:#3b5bdb; --accent-ink:#ffffff; --accent-soft:#e8edff;
+  --ok:#2f9e6b; --ok-soft:#e1f5ec; --warn:#c26d12; --warn-soft:#fdf0e0; --bad:#d6403f; --bad-soft:#fde8e8;
+  --hl:#fff3bf;
+  --shadow:0 1px 2px rgba(20,24,40,.06),0 8px 24px rgba(20,24,40,.07);
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161d; --surface:#1c1f29; --surface2:#222633; --ink:#eceef5; --muted:#9aa1b5; --line:#2c3040;
+    --accent:#7c93ff; --accent-ink:#10142a; --accent-soft:#252c52;
+    --ok:#52c68f; --ok-soft:#183328; --warn:#f0a85a; --warn-soft:#3a2b17; --bad:#ff7b7a; --bad-soft:#3d2022;
+    --hl:#4a4015;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif}
+body{overflow-x:clip}
+body.lock{overflow:hidden}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.muted{color:var(--muted)}
+.grow{flex:1}
 body.role-user .mo{display:none!important}
-body.role-user .chip b{display:none}
-#auth{position:fixed;inset:0;z-index:80;background:#f1f4f8;display:none;overflow-y:auto}
-#auth.on{display:block}
-.authbox{max-width:420px;margin:0 auto;background:#fff;min-height:100%;padding-bottom:24px}
-.authbox .logo{background:#1e3a5f;color:#fff;font-size:18px;font-weight:700;text-align:center;padding:16px}
-.authbox form{padding:16px}
-.authbox form input[type=text],.authbox form input[type=password],.authbox form input[type=tel]{margin-bottom:10px}
-.chk{display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-size:14px}
-.authbox .big{width:100%;padding:13px;font-size:16px}
-#aMsg{color:#e0483e;font-size:13px;min-height:18px;margin:10px 0 0;text-align:center}
-.su{display:none}
-#auth.signup .su{display:block}
-.footbar{margin:24px 14px 0;padding-top:14px;border-top:1px solid #e5e9ef;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.footbar .me{flex:1;font-size:12.5px;color:#555;min-width:120px}
-.mem{border:1px solid #d8dee7;border-radius:8px;padding:9px 10px;margin-bottom:8px;font-size:13px}
-.mem .l1{font-weight:700;color:#1e3a5f}
-.mem .l2{color:#666;margin:2px 0 6px}
-.mem .acts{display:flex;gap:6px;align-items:center}
-.mem select{width:auto;padding:6px;font-size:13px}
-.radios{display:flex;gap:18px;flex:1}
-.radios label{display:flex;align-items:center;gap:6px;width:auto;font-size:15px;font-weight:600;color:#1e3a5f}
-.radios input{width:20px;height:20px}
-#prPastModal .card .body{padding:8px}
-.nw{display:inline-block;background:#e0483e;color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;margin-right:4px;vertical-align:middle}
-td.hl{background:#fff2a8 !important;box-shadow:inset 0 0 0 1px #f2c200;font-weight:700}
-header{position:relative}
-#bell{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.18);border:0;border-radius:50%;width:34px;height:34px;font-size:17px;color:#fff}
+
+/* ---------- buttons / inputs ---------- */
+.btn{border:1px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:10px;font-weight:600;transition:background .15s,border-color .15s,transform .05s}
+.btn:hover{background:var(--surface2);border-color:color-mix(in srgb,var(--muted) 40%,var(--line))}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.primary:hover{background:color-mix(in srgb,var(--accent) 88%,#000)}
+.btn.danger{color:var(--bad)}
+.btn.dangerfill{background:var(--bad);color:#fff;border-color:transparent}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--bad-soft)}
+.btn.ghost.neutral:hover{background:var(--surface)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:9px}
+.btn.icon{padding:9px 12px;line-height:1}
+.btn[disabled]{opacity:.55;pointer-events:none}
+.in{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
+.in:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+textarea.in{min-height:130px;resize:vertical}
+input[type=date].in,input[type=time].in{display:block;min-width:0;max-width:100%;min-height:42px}
+select.in{appearance:auto}
+
+/* ---------- login ---------- */
+#login{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:38px 30px 26px;box-shadow:var(--shadow)}
+.login-card.shake{animation:shake .35s}
+.logo{width:48px;height:48px;border-radius:14px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:24px;margin-bottom:18px}
+.login-card h1{font-size:24px;letter-spacing:-.02em}
+.login-card>p{color:var(--muted);margin:4px 0 24px}
+.fld{margin-bottom:14px}
+.fld>label,.lbl{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.login-err{min-height:20px;color:var(--bad);font-size:13px;margin:4px 0 10px}
+.login-card .btn.primary{width:100%;padding:12px}
+.login-card .linkbtn{width:100%;margin-top:8px;color:var(--muted);font-weight:500;font-size:14px}
+.chk{display:flex;align-items:center;gap:9px;font-weight:600;cursor:pointer;padding:6px 0 8px}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.tb{display:flex;align-items:center;gap:14px;padding:12px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
+.brand .logo{width:38px;height:38px;border-radius:11px;font-size:19px;margin:0}
+.brand b{display:block;font-size:17px;letter-spacing:-.02em;line-height:1.2}
+.brand small{color:var(--muted);font-size:12px}
+.seg{display:inline-flex;background:var(--surface2);border:1px solid var(--line);border-radius:11px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 15px;border-radius:8px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(20,24,40,.12)}
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:170px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;z-index:20}
+.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 12px;border-radius:8px}
+.menu button:hover{background:var(--surface2)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+
+/* ---------- toolbar ---------- */
+main.wrap{padding-top:20px;padding-bottom:60px}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-right:auto}
+.chip{border:1px solid var(--line);background:var(--surface);padding:6px 14px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted)}
+.chip em{font-style:normal;margin-left:7px;font-size:12px;opacity:.8}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+#q{max-width:260px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tools:empty{display:none}
+
+/* ---------- badges ---------- */
+.bd{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface2);color:var(--muted);border:1px solid var(--line);white-space:nowrap}
+.bd.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.bd.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.bd.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.bd.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.bd.new{background:var(--bad);color:#fff;border-color:transparent;font-size:10px;padding:1px 7px;margin-right:6px;vertical-align:1px}
+
+/* ---------- check button ---------- */
+.check{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:transparent;color:transparent;display:inline-grid;place-items:center;font-size:13px;font-weight:800;padding:0;transition:all .15s}
+button.check:hover{border-color:var(--ok);color:var(--ok)}
+.check.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.check.ro{pointer-events:none}
+
+/* ---------- table view ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.tbl{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}
+.tbl th{text-align:left;font-size:12px;font-weight:700;color:var(--muted);padding:12px 14px;background:var(--surface2);border-bottom:1px solid var(--line)}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;overflow:hidden}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.row{cursor:pointer}
+.tbl tr.row:hover td{background:var(--surface2)}
+.tbl tr.row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tbl td.hl{background:var(--hl)}
+.tbl tr.row:hover td.hl{background:var(--hl)}
+.c-chk{width:56px} .c-date,.c-d1{width:150px} .c-cat{width:120px} .c-d2{width:200px} .c-st{width:110px}
+.t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.done .t{text-decoration:line-through;color:var(--muted)}
+.row.past{opacity:.62}
+.dt{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
+.dt.late{color:var(--bad);font-weight:700}
+.dt.today{color:var(--warn);font-weight:700}
+.who{font-weight:650}
+.tm{color:var(--muted);font-size:14px;white-space:nowrap}
+
+/* ---------- empty ---------- */
+.empty{text-align:center;color:var(--muted);padding:64px 16px}
+.empty h3{color:var(--ink);font-size:18px;margin-bottom:6px}
+.empty .btn{margin-top:16px}
+.foot-me{display:flex;align-items:center;gap:10px;margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+
+/* ---------- modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(10,12,20,.52);display:grid;place-items:center;padding:16px;z-index:50;animation:fade .15s}
+.overlay.l2{z-index:60}
+.dialog{width:100%;max-width:520px;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;background:var(--surface);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden;animation:pop .18s}
+.dlg-head{display:flex;align-items:center;padding:16px 18px 6px 22px}
+.dlg-head h2{font-size:15px;color:var(--muted);font-weight:700;margin-right:auto}
+.x{border:0;background:transparent;border-radius:50%;width:32px;height:32px;color:var(--muted)}
+.x:hover{background:var(--surface2)}
+.dlg-body{padding:6px 22px 18px;overflow:auto}
+.dlg-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 22px;border-top:1px solid var(--line);background:var(--surface2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.inl{display:flex;gap:8px;align-items:center}
+.inl .in{flex:1;min-width:0}
+.ferr{color:var(--bad);font-size:13px;min-height:18px}
+.d-title{font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.35;word-break:break-word}
+.d-title.done{text-decoration:line-through;color:var(--muted)}
+.d-badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 16px}
+.meta{display:grid;grid-template-columns:72px 1fr;gap:8px 12px;margin:0 0 16px;font-size:14px}
+.meta dt{color:var(--muted);font-weight:600}
+.meta dd{margin:0}
+.d-content{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;min-height:72px}
+.qps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qp{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600}
+.qp:hover{background:var(--accent-soft);color:var(--accent)}
+.rd{display:flex;gap:8px}
+.rd label{flex:1;position:relative}
+.rd input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.rd span{display:block;text-align:center;padding:10px 0;border:1px solid var(--line);border-radius:10px;font-weight:600;color:var(--muted);background:var(--surface)}
+.rd input:checked+span{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.rd input:focus-visible+span{outline:2px solid var(--accent);outline-offset:1px}
+.item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;background:var(--surface)}
+.item.sel{background:var(--accent-soft);border-color:var(--accent)}
+.item b{color:var(--muted);width:22px;font-weight:700}
+.item span{flex:1}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+.mem{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px}
+.mem .l1{font-weight:700}
+.mem .l2{color:var(--muted);font-size:13px;margin:2px 0 8px}
+.mem .acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mem select{width:auto}
+.ptbl{width:100%;border-collapse:collapse;font-size:14px}
+.ptbl th{text-align:left;font-size:12px;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line)}
+.ptbl td{padding:9px 6px;border-bottom:1px solid var(--line)}
+
+/* ---------- toast ---------- */
+#toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;z-index:100;pointer-events:none;width:calc(100% - 32px)}
+.toast{background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:var(--shadow);animation:pop .2s;max-width:420px;white-space:pre-line;text-align:left}
+.toast.bad{background:var(--bad);color:#fff}
+
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+@media (max-width:640px){
+  .wrap{padding:0 14px}
+  main.wrap{padding-top:14px}
+  .in{font-size:16px}               /* iOS 입력창 자동 확대 방지 */
+  .row2{grid-template-columns:1fr 1fr}
+  .row2>*{min-width:0}
+  .brand small{display:none}
+  .tb{gap:10px;padding:10px 0}
+  .seg{order:3;width:100%}           /* 탭은 둘째 줄에 꽉 차게 */
+  .seg button{flex:1;padding:6px 4px}
+  #q{max-width:none;width:100%}
+  .chips{width:100%}
+  .chip{flex:1;text-align:center;padding:6px 8px}
+  .overlay{padding:12px}
+  .dlg-body{padding:6px 18px 16px}
+  .dlg-foot{padding:12px 18px}
+
+  /* 표 → 카드형 목록 (가로 스크롤 없음) */
+  .tablecard{background:transparent;border:0;box-shadow:none;overflow:visible}
+  .tbl,.tbl tbody{display:block;width:100%}
+  .tbl thead{display:none}
+  .tbl tr.row{display:grid;column-gap:12px;row-gap:7px;align-items:center;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:12px 14px;margin-bottom:10px}
+  .tbl td{display:block;padding:0;border:0;min-width:0;width:auto}
+  .tbl tr.row:hover td{background:transparent}
+  .tbl td.hl,.tbl tr.row:hover td.hl{background:var(--hl);border-radius:6px;padding:1px 6px;margin:-1px -6px}
+  .t-sch tr.row{grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"chk title title title" "chk date cat st"}
+  .t-duty tr.row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"d1 d1 st" "d3 d2 d2"}
+  .t-pray tr.row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"d1 st" "d3 d3"}
+  .tbl td.c-chk{grid-area:chk;align-self:center}
+  .tbl td.c-title{grid-area:title}
+  .tbl td.c-date{grid-area:date;font-size:13px}
+  .tbl td.c-cat{grid-area:cat}
+  .tbl td.c-d1{grid-area:d1;font-size:13px}
+  .tbl td.c-d2{grid-area:d2}
+  .tbl td.c-d3{grid-area:d3}
+  .tbl td.c-st{grid-area:st}
+  .tbl .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+  .who{font-size:16px}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>순복음 영산교회<button id="bell" title="알림 허용">🔔</button></header>
-  <div id="warn">⚠ index.html 상단 SUPABASE_URL / SUPABASE_KEY 를 본인 프로젝트 값으로 바꿔주세요.</div>
 
-  <div class="tabs" id="mainTabs">
-    <button class="on" data-p="pSch">스케줄 관리</button>
-    <button data-p="pDuty">당직 관리</button>
-    <button data-p="pPray">기도 담당자</button>
-  </div>
-
-  <!-- ================= 스케줄 관리 ================= -->
-  <div class="page on" id="pSch">
-    <div class="tabs sub" id="subTabs">
-      <button class="on" data-s="todo">미완</button>
-      <button data-s="done">완료</button>
+<!-- ===== 로그인 / 회원가입 ===== -->
+<div id="login" hidden>
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="logo">✝</div>
+    <h1>순복음 영산교회</h1>
+    <p>스케줄 · 당직 · 기도 담당 관리</p>
+    <div class="fld"><label for="lid">아이디</label><input class="in" id="lid" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="30" required></div>
+    <div class="fld"><label for="lpw">비밀번호</label><input class="in" id="lpw" name="password" type="password" autocomplete="current-password" required></div>
+    <div id="suFields" hidden>
+      <div class="fld"><label for="lpw2">비밀번호 확인</label><input class="in" id="lpw2" type="password" autocomplete="new-password"></div>
+      <div class="fld"><label for="lpos">직분</label><input class="in" id="lpos" maxlength="20" placeholder="예: 집사, 권사, 장로"></div>
+      <div class="fld"><label for="ltel">전화번호</label><input class="in" id="ltel" type="tel" maxlength="20" placeholder="010-0000-0000"></div>
     </div>
-    <div style="height:14px"></div>
-    <h2>순복음 영산교회_스케줄 관리</h2>
-
-    <div class="row"><label>마감일</label><input type="date" id="sDue"></div>
-
-    <div class="row" style="display:none"><label>입력일자</label><input type="date" id="sDate" disabled></div>
-
-    <div class="row"><label>항목</label>
-      <select id="sCat"></select>
-      <button class="btn gray mo" id="btnCat">+항목</button>
-    </div>
-
-    <div class="row"><label>제목</label><input type="text" id="sTitle" maxlength="100" placeholder="제목 입력"></div>
-
-    <div class="row" style="align-items:flex-start"><label style="padding-top:10px">내용</label>
-      <textarea id="sContent" rows="5" placeholder="내용 입력"></textarea>
-    </div>
-
-    <div class="btns g3 mo">
-      <button class="btn" id="bAdd">추가</button>
-      <button class="btn orange" id="bEdit">수정</button>
-      <button class="btn red" id="bDel">삭제</button>
-      <button class="btn green" id="bDone">완료</button>
-      <button class="btn gray" id="bReset">초기화</button>
-    </div>
-
-    <div class="tbl-wrap">
-      <table>
-        <colgroup><col style="width:27%"><col style="width:23%"><col style="width:50%"></colgroup>
-        <thead><tr><th>마감일</th><th>항목</th><th>제목</th></tr></thead>
-        <tbody id="sBody"></tbody>
-      </table>
-    </div>
-    <p class="note">행을 누르면 위 입력란에 불러옵니다. 정렬: 마감일(미완은 빠른 순, 완료는 최신 순) → 항목 우선순위. 입력일자는 기록용입니다.</p>
-  </div>
-
-  <!-- ================= 당직 관리 ================= -->
-  <div class="page" id="pDuty">
-    <h2>당직 관리</h2>
-
-    <div class="row"><label>당직일자</label><input type="date" id="dDate"></div>
-
-    <div class="row"><label>근무시간</label>
-      <input type="time" id="dStart" value="09:00">
-      <span class="timeSep">~</span>
-      <input type="time" id="dEnd" value="17:00">
-    </div>
-    <div class="row mo"><label>프리셋</label>
-      <select id="pSel"></select>
-    </div>
-    <div class="btns mo" style="margin-top:0">
-      <button class="btn gray sm" id="pSave">현재 시간 저장</button>
-      <button class="btn green sm" id="pDefault">기본으로 설정</button>
-      <button class="btn red sm" id="pDel">프리셋 삭제</button>
-    </div>
-
-    <div class="row"><label>당직자</label>
-      <input type="text" id="dName" list="wList" placeholder="이름 입력/선택" maxlength="30">
-      <datalist id="wList"></datalist>
-      <button class="btn gray mo" id="bAddWorker">+당직자</button>
-    </div>
-    <div class="chips" id="chips"></div>
-    <div class="btns mo" style="margin-top:0"><button class="btn gray sm" id="wOrder">⇅ 당직자 기본 순서 설정</button></div>
-
-    <div class="btns g3 mo">
-      <button class="btn" id="dAdd">추가</button>
-      <button class="btn orange" id="dEdit">수정</button>
-      <button class="btn gray" id="dUp">순서 ▲</button>
-      <button class="btn gray" id="dDown">순서 ▼</button>
-      <button class="btn red" id="dDel">삭제</button>
-    </div>
-
-    <div class="tbl-wrap">
-      <table>
-        <colgroup><col style="width:33%"><col style="width:39%"><col style="width:28%"></colgroup>
-        <thead><tr><th>당직일자</th><th>근무시간</th><th>당직자</th></tr></thead>
-        <tbody id="dBody"></tbody>
-      </table>
-    </div>
-    <p class="note">순서 ▲▼ : 선택한 행의 당직자를 위/아래 행과 맞바꿉니다. (날짜·시간은 그대로)</p>
-
-    <div class="box mo" style="margin-top:16px">
-      <b style="font-size:13px">📅 당직 일괄 도구</b>
-      <div class="row" style="margin-top:8px"><label style="width:50px">주 수</label>
-        <input type="number" id="dWeeks" min="1" max="12" value="4" inputmode="numeric">
-      </div>
-      <div class="row"><label style="width:50px">시작</label>
-        <select id="dStartWorker"></select>
-        <button class="btn sm" id="dGen">월요일 자동생성</button>
-      </div>
-      <p class="note">표의 마지막 날짜 다음 주 월요일부터, 입력한 주 수만큼 '당직자 기본 순서'대로 배정합니다. (표가 비어 있으면 오늘 이후 첫 월요일부터) 시작 당직자를 고르면 그 사람부터, '이어서'를 두면 마지막 당직 다음 사람부터 시작합니다. 공휴일은 위 '추가'로 직접 넣어주세요.</p>
-      <div class="btns" style="margin:8px 0 0">
-        <button class="btn gray sm" id="dRotate">선택 행부터 이후 순환 재배정</button>
-      </div>
-      <p class="note">선택한 행의 당직자를 기준으로, 그 날짜 이후 모든 행을 당직자 등록 순서대로 다시 배정합니다. (당직자 변경 후 한 달치 순서 조정용)</p>
-    </div>
-  </div>
-
-  <!-- ================= 기도 담당자 ================= -->
-  <div class="page" id="pPray">
-    <h2>기도 담당자</h2>
-
-    <div class="row"><label>구분</label>
-      <div class="radios">
-        <label><input type="radio" name="prCat" value="새벽기도" checked> 새벽기도</label>
-        <label><input type="radio" name="prCat" value="저녁기도"> 저녁기도</label>
-      </div>
-    </div>
-
-    <div class="row"><label>날짜</label><input type="date" id="prDate"></div>
-
-    <div class="row"><label>담당자1</label>
-      <input type="text" id="prW1" list="prList" placeholder="이름 입력/선택" maxlength="30">
-    </div>
-    <div class="row"><label>담당자2</label>
-      <input type="text" id="prW2" list="prList" placeholder="이름 입력/선택 (선택사항)" maxlength="30">
-    </div>
-    <datalist id="prList"></datalist>
-
-    <div class="row mo"><label>명단 등록</label>
-      <input type="text" id="prNew" placeholder="새 담당자 이름" maxlength="30">
-      <button class="btn gray" id="prAddWorker">+담당자</button>
-    </div>
-    <div class="chips" id="prChips"></div>
-    <div class="btns mo" style="margin-top:0"><button class="btn gray sm" id="prOrder">⇅ 담당자 기본 순서 설정</button></div>
-
-    <div class="btns g3 mo">
-      <button class="btn" id="prAdd">추가</button>
-      <button class="btn orange" id="prEdit">수정</button>
-      <button class="btn gray" id="prUp">순서 ▲</button>
-      <button class="btn gray" id="prDown">순서 ▼</button>
-      <button class="btn red" id="prDel">삭제</button>
-    </div>
-
-    <div class="tbl-wrap">
-      <table>
-        <colgroup><col style="width:36%"><col style="width:14%"><col style="width:50%"></colgroup>
-        <thead><tr><th>날짜</th><th>요일</th><th>담당자</th></tr></thead>
-        <tbody id="prBody"></tbody>
-      </table>
-    </div>
-    <p class="note">오늘 이후 일정만 표시됩니다. 순서 ▲▼ : 선택한 행의 담당자를 위/아래 행과 맞바꿉니다. (날짜는 그대로)</p>
-    <div class="btns" style="margin-top:6px"><button class="btn gray sm" id="prPast">🕘 지난 2주 보기</button></div>
-
-    <div class="box mo" style="margin-top:12px">
-      <b style="font-size:13px">📅 기도 담당 일괄 도구</b>
-      <div class="row" style="margin-top:8px"><label style="width:50px">기간</label>
-        <input type="date" id="prFrom"><span class="timeSep">~</span><input type="date" id="prTo">
-      </div>
-      <div class="row"><label style="width:50px">시작</label>
-        <select id="prStartWorker"></select>
-        <button class="btn sm" id="prGen">기간 자동생성</button>
-      </div>
-      <p class="note">선택한 기간의 매일(위에서 고른 구분)을 담당자 기본 순서대로 2명씩 묶어 배정합니다. 이미 있는 날짜는 건너뜁니다. 시작 담당자를 고르면 그 사람부터, '이어서'는 직전 일정 다음 사람부터 시작합니다.</p>
-      <div class="btns" style="margin:8px 0 0">
-        <button class="btn gray sm" id="prRotate">선택 행부터 이후 순환 재배정</button>
-      </div>
-      <p class="note">선택한 행의 담당자1을 기준으로, 이후 모든 행을 기본 순서대로 2명씩 다시 배정합니다.</p>
-    </div>
-  </div>
-
-  <div class="footbar">
-    <span class="me" id="meInfo"></span>
-    <button class="btn gray sm" id="btnMembers" style="display:none">회원 관리</button>
-    <button class="btn red sm" id="btnLogout">로그아웃</button>
-  </div>
+    <label class="chk"><input type="checkbox" id="lauto" checked> 자동 로그인</label>
+    <div class="login-err" id="loginErr" role="alert"></div>
+    <button class="btn primary" type="submit" id="loginBtn">로그인</button>
+    <button class="btn ghost neutral linkbtn" type="button" id="loginSwitch">계정이 없으신가요? 회원가입</button>
+  </form>
 </div>
 
-<!-- 로그인 / 회원가입 화면 -->
-<div id="auth">
-  <div class="authbox">
-    <div class="logo">순복음 영산교회</div>
-    <div class="tabs" id="authTabs">
-      <button class="on" data-m="login" type="button">로그인</button>
-      <button data-m="signup" type="button">회원가입</button>
-    </div>
-    <form id="authForm" autocomplete="on">
-      <input type="text" id="aId" name="username" autocomplete="username" placeholder="아이디" maxlength="30" autocapitalize="none" autocorrect="off">
-      <input type="password" id="aPw" name="password" autocomplete="current-password" placeholder="비밀번호">
-      <div class="su">
-        <input type="password" id="aPw2" autocomplete="new-password" placeholder="비밀번호 확인">
-        <input type="text" id="aPos" placeholder="직분 (예: 집사, 권사, 장로)" maxlength="20">
-        <input type="tel" id="aTel" placeholder="전화번호 (예: 010-0000-0000)" maxlength="20">
+<!-- ===== 앱 ===== -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="wrap tb">
+      <div class="brand">
+        <div class="logo">✝</div>
+        <div><b>순복음 영산교회</b><small id="todayLabel"></small></div>
       </div>
-      <label class="chk"><input type="checkbox" id="aAuto" checked> 자동 로그인</label>
-      <button class="btn big" id="aSubmit" type="submit">로그인</button>
-      <p id="aMsg"></p>
-    </form>
-  </div>
-</div>
-
-<!-- 회원 관리 모달 (마스터 전용) -->
-<div class="modal" id="memModal">
-  <div class="card">
-    <h3>회원 관리</h3>
-    <div class="body">
-      <div id="memList"></div>
-      <p class="note">권한 1 = 마스터(모든 기능), 2 = 유저(조회만). 마스터는 최소 1명이 있어야 합니다.</p>
-    </div>
-    <div class="foot"><button class="btn gray" id="memClose">닫기</button></div>
-  </div>
-</div>
-
-<!-- 지난 기도 담당자 모달 -->
-<div class="modal" id="prPastModal">
-  <div class="card">
-    <h3 id="prPastTitle">지난 2주</h3>
-    <div class="body">
-      <table style="font-size:12.5px">
-        <colgroup><col style="width:38%"><col style="width:14%"><col style="width:48%"></colgroup>
-        <thead><tr><th>날짜</th><th>요일</th><th>담당자</th></tr></thead>
-        <tbody id="prPastBody"></tbody>
-      </table>
-    </div>
-    <div class="foot"><button class="btn gray" id="prPastClose">닫기</button></div>
-  </div>
-</div>
-
-<!-- 기도 담당자 기본 순서 모달 -->
-<div class="modal" id="prWModal">
-  <div class="card">
-    <h3>기도 담당자 기본 순서</h3>
-    <div class="body">
-      <div id="prWOrderList"></div>
-      <p class="note">담당자를 누른 뒤 ▲▼ 로 순서를 바꾸고 [저장]을 누르세요. 기간 자동생성과 재배정은 이 순서를 따릅니다.</p>
-    </div>
-    <div class="foot">
-      <button class="btn gray sm" id="prWUp" style="flex:0 0 52px">▲</button>
-      <button class="btn gray sm" id="prWDown" style="flex:0 0 52px">▼</button>
-      <button class="btn green" id="prWSave">저장</button>
-      <button class="btn gray" id="prWClose">닫기</button>
-    </div>
-  </div>
-</div>
-
-<!-- 항목 관리 모달 -->
-<div class="modal" id="catModal">
-  <div class="card">
-    <h3>항목 관리 / 우선순위</h3>
-    <div class="body">
-      <div class="row" style="margin-bottom:10px">
-        <input type="text" id="newCat" placeholder="새 항목 이름" maxlength="30">
-        <button class="btn" id="catAdd">추가</button>
+      <div class="seg" role="tablist" aria-label="메뉴">
+        <button data-view="sch" role="tab">스케줄 관리</button>
+        <button data-view="duty" role="tab">당직 관리</button>
+        <button data-view="pray" role="tab">기도 담당자</button>
       </div>
-      <div id="catList"></div>
-      <p class="note">항목을 누른 뒤 ▲▼ 로 우선순위(위가 높음)를 조정하고 [저장]을 누르세요.</p>
+      <button class="btn primary mo" data-new id="btnNew">＋ 새 일정</button>
+      <div class="menu-wrap">
+        <button class="btn icon" id="btnMenu" aria-label="더보기" aria-haspopup="true">⋯</button>
+        <div class="menu" id="menu" hidden>
+          <button data-act="refresh">새로고침</button>
+          <button data-act="notify">알림 허용</button>
+          <button data-act="members" id="menuMembers" hidden>회원 관리</button>
+          <hr>
+          <button data-act="logout">로그아웃</button>
+        </div>
+      </div>
     </div>
-    <div class="foot">
-      <button class="btn gray sm" id="catUp" style="flex:0 0 52px">▲</button>
-      <button class="btn gray sm" id="catDown" style="flex:0 0 52px">▼</button>
-      <button class="btn red sm" id="catDel" style="flex:0 0 52px">삭제</button>
-      <button class="btn green" id="catSave">저장</button>
-      <button class="btn gray" id="catClose">닫기</button>
+  </header>
+  <main class="wrap">
+    <div class="toolbar">
+      <div class="chips" id="chips"></div>
+      <input class="in" id="q" type="search" placeholder="검색" aria-label="검색">
     </div>
-  </div>
+    <div class="tools" id="tools"></div>
+    <section id="view" aria-live="polite"></section>
+    <div class="foot-me"><span id="meInfo"></span><span class="grow"></span><button class="btn sm" data-act="logout">로그아웃</button></div>
+  </main>
 </div>
 
-<!-- 당직자 기본 순서 모달 -->
-<div class="modal" id="wModal">
-  <div class="card">
-    <h3>당직자 기본 순서</h3>
-    <div class="body">
-      <div id="wOrderList"></div>
-      <p class="note">당직자를 누른 뒤 ▲▼ 로 순서를 바꾸고 [저장]을 누르세요. 월요일 자동생성과 재배정은 이 순서를 따릅니다.</p>
-    </div>
-    <div class="foot">
-      <button class="btn gray sm" id="wUp" style="flex:0 0 52px">▲</button>
-      <button class="btn gray sm" id="wDown" style="flex:0 0 52px">▼</button>
-      <button class="btn green" id="wSave">저장</button>
-      <button class="btn gray" id="wClose">닫기</button>
-    </div>
-  </div>
-</div>
+<div id="modalRoot"></div>
+<div id="modalRoot2"></div>
+<div id="toasts" aria-live="polite"></div>
 
-<div id="toast"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Supabase 설정 (본인 값으로 교체) ===== */
-const SUPABASE_URL = 'https://qqmebndptbrvlzlkklxn.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_OPDTpDVMK7xwzLcArD7xNw_lWpkXl6x';
-/* ======================================== */
+(() => {
+'use strict';
 
-const configured = !SUPABASE_URL.startsWith('YOUR_');
-let sb = null;
-/* 로그인 토큰: 자동 로그인 ON 이면 localStorage, OFF 이면 sessionStorage(브라우저를 닫으면 로그아웃) */
+/* =====================  설정  ===================== */
+const CFG = {
+  url: 'https://qqmebndptbrvlzlkklxn.supabase.co',
+  key: 'sb_publishable_OPDTpDVMK7xwzLcArD7xNw_lWpkXl6x'
+};
+
+/* =====================  유틸  ===================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ls = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} }
+};
+const pad = n => String(n).padStart(2,'0');
+const toStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => toStr(new Date());
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const DOW = ['일','월','화','수','목','금','토'];
+const wday = s => s ? DOW[parse(s).getDay()] : '';
+const fmt = s => { if (!s) return ''; const d = parse(s); return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} (${DOW[d.getDay()]})`; };
+const dot = s => s ? s.replaceAll('-', '.') : '';
+const diffDays = s => Math.round((parse(s) - parse(today())) / 86400000);
+const addDays = (n, base) => { const d = base ? new Date(base) : new Date(); d.setDate(d.getDate() + n); return d; };
+const fmtT = t => {
+  if (!t) return '';
+  let [h, m] = t.split(':').map(Number);
+  const ap = h < 12 ? '오전' : '오후';
+  h = h % 12 || 12;
+  return `${ap} ${h}:${pad(m)}`;
+};
+const clip = (s, n = 80) => { s = (s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; };
+
+function toast(msg, type = ''){
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), type === 'bad' ? 5000 : 2400);
+}
+
+/* =====================  로그인 토큰 / Supabase  ===================== */
+// 자동 로그인 ON 이면 localStorage, OFF 이면 sessionStorage(브라우저를 닫으면 로그아웃)
 const store = {
-  get() { try { return localStorage.getItem('sess') || sessionStorage.getItem('sess'); } catch (e) { return null; } },
-  set(tok, persist) { try { localStorage.removeItem('sess'); sessionStorage.removeItem('sess'); (persist ? localStorage : sessionStorage).setItem('sess', tok); } catch (e) {} },
-  clear() { try { localStorage.removeItem('sess'); sessionStorage.removeItem('sess'); } catch (e) {} }
+  get(){ try { return localStorage.getItem('sess') || sessionStorage.getItem('sess'); } catch { return null; } },
+  set(tok, persist){ try { localStorage.removeItem('sess'); sessionStorage.removeItem('sess'); (persist ? localStorage : sessionStorage).setItem('sess', tok); } catch {} },
+  clear(){ try { localStorage.removeItem('sess'); sessionStorage.removeItem('sess'); } catch {} }
 };
 let TOKEN = store.get();
 // 모든 DB 요청에 로그인 토큰을 헤더로 실어 보냄 (DB 쪽에서 마스터 여부를 확인)
@@ -416,90 +367,872 @@ const authFetch = (url, opt = {}) => {
   if (TOKEN) h.set('x-session-token', TOKEN);
   return fetch(url, { ...opt, headers: h });
 };
-if (configured) sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  global: { fetch: authFetch }, auth: { persistSession: false, autoRefreshToken: false }
-});
-else document.getElementById('warn').style.display = 'block';
+const sb = window.supabase
+  ? window.supabase.createClient(CFG.url, CFG.key, { global: { fetch: authFetch }, auth: { persistSession: false, autoRefreshToken: false } })
+  : null;
 
-const $ = id => document.getElementById(id);
-const pad = n => String(n).padStart(2, '0');
-const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const today = () => ymd(new Date());
-const esc = s => (s ?? '').toString().replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const dot = s => s ? s.replaceAll('-', '.') : '';
-function fmtT(t) {
-  if (!t) return '';
-  let [h, m] = t.split(':').map(Number);
-  const ap = h < 12 ? '오전' : '오후';
-  h = h % 12 || 12;
-  return `${ap} ${h}:${pad(m)}`;
-}
-let tt;
-function toast(msg) {
-  const t = $('toast'); t.textContent = msg; t.classList.add('on');
-  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2200);
-}
-async function run(q) {
-  if (!sb) { toast('Supabase 설정이 필요합니다'); throw new Error('no config'); }
+async function run(q){
   const { data, error } = await q;
-  if (error) { toast('오류: ' + error.message); throw error; }
+  if (error){ toast('오류: ' + error.message, 'bad'); throw error; }
   return data;
 }
+async function rpc(fn, args){
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw error;
+  return data;
+}
+// 수정/삭제가 DB 권한 때문에 0건 처리되면(로그인 만료 등) 알려줌
+async function mutate(q){
+  const rows = await run(q.select());
+  if (!rows || !rows.length){
+    toast('저장되지 않았어요. 로그인 상태나 권한을 확인해 주세요.', 'bad'); refreshMe();
+    throw new Error('no rows');
+  }
+  return rows;
+}
 
-/* ---------- NEW / 수정 하이라이트 / 알림 공통 ---------- */
+/* =====================  상태  ===================== */
+const TABS = ['sch', 'duty', 'pray'];
+const state = {
+  tab: TABS.includes(ls.get('tab')) ? ls.get('tab') : 'sch',
+  q: '',
+  schFilter: 'open', dutyFilter: 'upcoming',
+  prayCat: ls.get('prayCat') === '저녁기도' ? '저녁기도' : '새벽기도',
+  cats: [], sch: [], workers: [], duties: [], presets: [], prWorkers: [], prRows: [],
+  loading: { sch: true, duty: true, pray: true }, error: null, loadedAt: 0
+};
+let ME = null, appStarted = false, authMode = 'login';
+const isMaster = () => !!ME && ME.role_id === 1;
+
+/* ---- NEW 배지 / 수정 하이라이트 ---- */
+const CID = (() => { let v = ls.get('cid'); if (!v){ v = Math.random().toString(36).slice(2); ls.set('cid', v); } return v; })();
 const H24 = 24 * 3600 * 1000;
 const isNew = r => r.created_at && Date.now() - new Date(r.created_at) < H24;
 const recentEdit = r => r.updated_at && Date.now() - new Date(r.updated_at) < H24;
-const hl = (r, f) => (recentEdit(r) && (r.changed_fields || []).includes(f)) ? 'hl' : '';
-const CID = (() => { try { let v = localStorage.getItem('cid'); if (!v) { v = Math.random().toString(36).slice(2); localStorage.setItem('cid', v); } return v; } catch (e) { return 'x' + Math.random(); } })();
-// 수정 시 변경된 필드만 찾고, 24시간 내 이전 수정 필드는 함께 유지
-function editMeta(old, p) {
+const hl = (r, ...fs) => (recentEdit(r) && fs.some(f => (r.changed_fields || []).includes(f))) ? 'hl' : '';
+const newBadge = r => isNew(r) ? '<span class="bd new">NEW</span>' : '';
+function editMeta(old, p){
   const ch = Object.keys(p).filter(k => (old[k] ?? '') != (p[k] ?? ''));
   if (!ch.length) return null;
   const prev = recentEdit(old) ? (old.changed_fields || []) : [];
   return { changed_fields: [...new Set([...prev, ...ch])], updated_at: new Date().toISOString(), updated_by: CID };
 }
+
+/* =====================  데이터 불러오기  ===================== */
+async function loadSch(){
+  try {
+    state.cats = await run(sb.from('categories').select('*').order('sort_order').order('id'));
+    state.sch = await run(sb.from('schedules').select('*'));
+    state.error = null;
+  } catch (e) { state.error = e.message; }
+  state.loading.sch = false; state.loadedAt = Date.now(); render();
+}
+async function loadDuty(){
+  try {
+    state.workers = await run(sb.from('duty_workers').select('*').order('sort_order').order('id'));
+    state.duties = await run(sb.from('duty_schedule').select('*').order('duty_date').order('id'));
+    try { state.presets = await run(sb.from('duty_presets').select('*').order('id')); } catch { state.presets = []; }
+    state.error = null;
+  } catch (e) { state.error = e.message; }
+  state.loading.duty = false; state.loadedAt = Date.now(); render();
+}
+async function loadPray(){
+  try {
+    state.prWorkers = await run(sb.from('prayer_workers').select('*').order('sort_order').order('id'));
+    state.prRows = await run(sb.from('prayer_schedule').select('*').gte('pray_date', toStr(addDays(-14))).order('pray_date').order('id'));
+    state.error = null;
+  } catch (e) { state.error = e.message; }
+  state.loading.pray = false; state.loadedAt = Date.now(); render();
+}
+const LOADERS = { sch: loadSch, duty: loadDuty, pray: loadPray };
+const reloadAll = () => { loadSch(); loadDuty(); loadPray(); };
+
+/* =====================  목록 계산  ===================== */
+const catName = id => (state.cats.find(c => c.id === id) || {}).name || '';
+const prNames = r => [r.worker1, r.worker2].filter(Boolean).join(', ');
+const needle = () => state.q.trim().toLowerCase();
+
+function schList(){
+  const q = needle(), done = state.schFilter === 'done';
+  const order = {}; state.cats.forEach((c, i) => order[c.id] = i);
+  const rank = r => r.category_id in order ? order[r.category_id] : 9999;
+  const dir = done ? -1 : 1;
+  const dd = r => r.due_date || (dir === 1 ? '9999-12-31' : '0000-00-00');   // 마감일 없는 옛 데이터는 맨 뒤
+  return state.sch
+    .filter(r => r.done === done && (!q || `${r.title} ${r.content || ''} ${catName(r.category_id)}`.toLowerCase().includes(q)))
+    .sort((a, b) => dir * dd(a).localeCompare(dd(b)) || rank(a) - rank(b) || a.id - b.id);
+}
+function dutyList(){
+  const q = needle(), t = today(), f = state.dutyFilter;
+  let l = state.duties.filter(r =>
+    (f === 'all' || (f === 'upcoming' ? r.duty_date >= t : r.duty_date < t)) &&
+    (!q || `${r.worker_name} ${dot(r.duty_date)}`.toLowerCase().includes(q)));
+  if (f === 'past') l = [...l].reverse();
+  return l;
+}
+function prayList(cat = state.prayCat){
+  const q = needle(), t = today();
+  return state.prRows
+    .filter(r => r.category === cat && r.pray_date >= t && (!q || `${prNames(r)} ${dot(r.pray_date)}`.toLowerCase().includes(q)))
+    .sort((a, b) => a.pray_date.localeCompare(b.pray_date) || a.id - b.id);
+}
+
+/* =====================  렌더링  ===================== */
+function dayBadge(s){
+  const d = diffDays(s);
+  if (d < 0) return '<span class="bd">지난</span>';
+  if (d === 0) return '<span class="bd warn">오늘</span>';
+  return `<span class="bd ${d <= 3 ? 'warn' : ''}">D-${d}</span>`;
+}
+function schBadge(r){
+  if (r.done) return '<span class="bd ok">완료</span>';
+  if (!r.due_date) return '';
+  const d = diffDays(r.due_date);
+  if (d < 0) return `<span class="bd bad">지연 D+${-d}</span>`;
+  if (d === 0) return '<span class="bd warn">오늘</span>';
+  return `<span class="bd ${d <= 3 ? 'warn' : ''}">D-${d}</span>`;
+}
+const emptyHtml = (h, p) => `<div class="empty"><h3>${h}</h3><p>${p || ''}</p></div>`;
+
+function renderSch(){
+  const list = schList();
+  if (!list.length){
+    return state.sch.length || state.q
+      ? emptyHtml('조건에 맞는 일정이 없어요', '검색어나 필터를 바꿔 보세요.')
+      : `<div class="empty"><h3>아직 등록된 일정이 없어요</h3><p>첫 일정을 추가해 보세요.</p>${isMaster() ? '<button class="btn primary" data-new>＋ 새 일정</button>' : ''}</div>`;
+  }
+  const rows = list.map(r => {
+    const dc = !r.done && r.due_date ? (diffDays(r.due_date) < 0 ? 'late' : diffDays(r.due_date) === 0 ? 'today' : '') : '';
+    const chk = isMaster()
+      ? `<button class="check ${r.done ? 'on' : ''}" data-toggle="${r.id}" aria-label="${r.done ? '완료 해제' : '완료 처리'}" title="${r.done ? '완료 해제' : '완료 처리'}">✓</button>`
+      : `<span class="check ro ${r.done ? 'on' : ''}">✓</span>`;
+    const cn = catName(r.category_id);
+    return `<tr class="row ${r.done ? 'done' : ''}" data-open="${r.id}" data-kind="sch" tabindex="0">
+      <td class="c-chk">${chk}</td>
+      <td class="c-date dt ${dc} ${hl(r, 'due_date')}">${r.due_date ? fmt(r.due_date) : '-'}</td>
+      <td class="c-cat ${hl(r, 'category_id')}">${cn ? `<span class="bd acc">${esc(cn)}</span>` : ''}</td>
+      <td class="c-title ${hl(r, 'title', 'content')}"><div class="t">${newBadge(r)}${esc(r.title)}</div></td>
+      <td class="c-st">${schBadge(r)}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="card tablecard"><table class="tbl t-sch">
+    <thead><tr><th class="c-chk"></th><th class="c-date">마감일</th><th class="c-cat">항목</th><th>제목</th><th class="c-st">상태</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+function renderDuty(){
+  const list = dutyList();
+  if (!list.length){
+    return state.duties.length || state.q
+      ? emptyHtml('조건에 맞는 당직이 없어요', '필터를 바꿔 보세요.')
+      : `<div class="empty"><h3>등록된 당직이 없어요</h3><p>당직자를 등록하고 일정을 만들어 보세요.</p>${isMaster() ? '<button class="btn primary" data-new>＋ 새 당직</button>' : ''}</div>`;
+  }
+  const t = today();
+  const rows = list.map(r => `<tr class="row ${r.duty_date < t ? 'past' : ''}" data-open="${r.id}" data-kind="duty" tabindex="0">
+      <td class="c-d1 dt ${hl(r, 'duty_date')}">${newBadge(r)}${fmt(r.duty_date)}</td>
+      <td class="c-d2 tm ${hl(r, 'start_time', 'end_time')}">${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}</td>
+      <td class="c-d3 who ${hl(r, 'worker_name')}">${esc(r.worker_name)}</td>
+      <td class="c-st">${dayBadge(r.duty_date)}</td>
+    </tr>`).join('');
+  return `<div class="card tablecard"><table class="tbl t-duty">
+    <thead><tr><th class="c-d1">당직일자</th><th class="c-d2">근무시간</th><th>당직자</th><th class="c-st">상태</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+function renderPray(){
+  const list = prayList();
+  if (!list.length){
+    return emptyHtml(`${state.prayCat} 일정이 없어요`, '오늘 이후로 등록된 일정이 없습니다.') +
+      (isMaster() ? '' : '');
+  }
+  const rows = list.map(r => `<tr class="row" data-open="${r.id}" data-kind="pray" tabindex="0">
+      <td class="c-d1 dt ${hl(r, 'pray_date')}">${newBadge(r)}${fmt(r.pray_date)}</td>
+      <td class="c-d3 who ${hl(r, 'worker1', 'worker2')}">${esc(prNames(r))}</td>
+      <td class="c-st">${dayBadge(r.pray_date)}</td>
+    </tr>`).join('');
+  return `<div class="card tablecard"><table class="tbl t-pray">
+    <thead><tr><th class="c-d1">날짜 (요일)</th><th>담당자</th><th class="c-st">상태</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function render(){
+  const d = new Date();
+  $('#todayLabel').textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[d.getDay()]}요일`;
+  document.querySelectorAll('[data-view]').forEach(b => {
+    const on = b.dataset.view === state.tab;
+    b.classList.toggle('on', on); b.setAttribute('aria-selected', on);
+  });
+  $('#btnNew').textContent = { sch: '＋ 새 일정', duty: '＋ 새 당직', pray: '＋ 새 기도 담당' }[state.tab];
+
+  // 칩
+  const t = today();
+  let chips = [];
+  if (state.tab === 'sch'){
+    const n = state.sch.filter(r => !r.done).length;
+    chips = [['open', '미완', n, state.schFilter], ['done', '완료', state.sch.length - n, state.schFilter]];
+  } else if (state.tab === 'duty'){
+    const up = state.duties.filter(r => r.duty_date >= t).length;
+    chips = [['upcoming', '예정', up, state.dutyFilter], ['past', '지난', state.duties.length - up, state.dutyFilter], ['all', '전체', state.duties.length, state.dutyFilter]];
+  } else {
+    chips = ['새벽기도', '저녁기도'].map(c => [c, c, prayList(c).length, state.prayCat]);
+  }
+  $('#chips').innerHTML = chips.map(([k, l, n, cur]) => `<button class="chip ${cur === k ? 'on' : ''}" data-filter="${k}">${l}<em>${n}</em></button>`).join('');
+
+  // 도구 버튼
+  const m = isMaster();
+  $('#tools').innerHTML = state.tab === 'sch'
+    ? (m ? '<button class="btn sm" data-act="cats">항목 관리 · 우선순위</button>' : '')
+    : state.tab === 'duty'
+    ? (m ? '<button class="btn sm" data-act="roster-duty">당직자 명단 · 순서</button><button class="btn sm" data-act="gen-duty">월요일 일괄 생성</button>' : '')
+    : (m ? '<button class="btn sm" data-act="roster-pray">담당자 명단 · 순서</button><button class="btn sm" data-act="gen-pray">기간 일괄 생성</button>' : '') +
+      '<button class="btn sm" data-act="past-pray">🕘 지난 2주 보기</button>';
+
+  $('#meInfo').textContent = ME ? `${ME.login_id}${ME.position ? ' · ' + ME.position : ''} · ${ME.role_name}` : '';
+  $('#menuMembers').hidden = !m;
+
+  const v = $('#view');
+  if (state.loading[state.tab]){ v.innerHTML = '<div class="empty">불러오는 중…</div>'; return; }
+  if (state.error){
+    v.innerHTML = `<div class="empty"><h3>문제가 생겼어요</h3><p>${esc(state.error)}</p><button class="btn" data-act="refresh">다시 시도</button></div>`;
+    return;
+  }
+  v.innerHTML = state.tab === 'sch' ? renderSch() : state.tab === 'duty' ? renderDuty() : renderPray();
+}
+
+/* =====================  모달 공통  ===================== */
+let askCancel = null;
+function showModal({ title, body, footer = '', sticky = false, layer = 1 }){
+  const root = $(layer === 2 ? '#modalRoot2' : '#modalRoot');
+  root.innerHTML = `<div class="overlay ${layer === 2 ? 'l2' : ''}" ${sticky ? '' : `data-overlay="${layer}"`}>
+    <div class="dialog" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <div class="dlg-head"><h2>${esc(title)}</h2><button class="x" data-close="${layer}" aria-label="닫기">✕</button></div>
+      <div class="dlg-body">${body}</div>${footer ? `<div class="dlg-foot">${footer}</div>` : ''}
+    </div></div>`;
+  document.body.classList.add('lock');
+  const f = root.querySelector('[autofocus]'); if (f) f.focus();
+}
+function closeModal(layer = 1){
+  if (layer === 2 || layer === 'all'){ if (askCancel){ const c = askCancel; askCancel = null; c(); } $('#modalRoot2').innerHTML = ''; }
+  if (layer === 1 || layer === 'all') $('#modalRoot').innerHTML = '';
+  if (!$('#modalRoot .overlay') && !$('#modalRoot2 .overlay')) document.body.classList.remove('lock');
+}
+const modalOpen = () => !!($('#modalRoot .overlay') || $('#modalRoot2 .overlay'));
+
+// 확인 / 입력 창 (layer 2)
+function askBox({ title, message = '', input = null, ok = '확인', danger = false }){
+  return new Promise(resolve => {
+    askCancel = () => resolve(input ? null : false);
+    showModal({
+      title, layer: 2, sticky: true,
+      body: `<form id="askf" novalidate>${message ? `<p style="padding:6px 0 10px;line-height:1.7">${message}</p>` : ''}
+        ${input ? `<input class="in" id="ask-in" type="${input.type || 'text'}" placeholder="${esc(input.placeholder || '')}" autocomplete="off" autofocus>` : ''}</form>`,
+      footer: `<span class="grow"></span><button class="btn" type="button" id="ask-no">취소</button>
+        <button class="btn ${danger ? 'dangerfill' : 'primary'}" type="submit" form="askf">${ok}</button>`
+    });
+    const done = v => { askCancel = null; closeModal(2); resolve(v); };
+    $('#askf').addEventListener('submit', e => { e.preventDefault(); done(input ? ($('#ask-in').value.trim() || null) : true); });
+    $('#ask-no').addEventListener('click', () => done(input ? null : false));
+  });
+}
+
+/* =====================  상세 보기  ===================== */
+function openDetail(kind, id){
+  if (kind === 'sch'){
+    const r = state.sch.find(x => x.id === id); if (!r) return;
+    const cn = catName(r.category_id);
+    showModal({
+      title: '일정 상세',
+      body: `<div class="d-title ${r.done ? 'done' : ''}">${esc(r.title)}</div>
+        <div class="d-badges">${schBadge(r)}${cn ? `<span class="bd acc">${esc(cn)}</span>` : ''}${newBadge(r)}</div>
+        <dl class="meta"><dt>마감일</dt><dd>${r.due_date ? fmt(r.due_date) : '-'}</dd><dt>상태</dt><dd>${r.done ? '완료' : '미완'}</dd></dl>
+        <div class="d-content">${r.content ? esc(r.content) : '<span class="muted">내용이 없습니다.</span>'}</div>`,
+      footer: isMaster() ? `<button class="btn danger ghost" data-del="${id}" data-kind="sch">삭제</button><span class="grow"></span>
+        <button class="btn" data-toggle-d="${id}">${r.done ? '완료 해제' : '완료 처리'}</button>
+        <button class="btn primary" data-edit="${id}" data-kind="sch">수정</button>` : ''
+    });
+  } else if (kind === 'duty'){
+    const r = state.duties.find(x => x.id === id); if (!r) return;
+    showModal({
+      title: '당직 상세',
+      body: `<div class="d-title">${esc(r.worker_name)}</div>
+        <div class="d-badges">${dayBadge(r.duty_date)}${newBadge(r)}</div>
+        <dl class="meta"><dt>당직일자</dt><dd>${fmt(r.duty_date)}</dd><dt>근무시간</dt><dd>${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}</dd></dl>`,
+      footer: isMaster() ? `<button class="btn danger ghost" data-del="${id}" data-kind="duty">삭제</button>
+        <button class="btn sm" data-move="-1" data-kind="duty" data-id="${id}" title="위 행과 당직자 교환">순서 ▲</button>
+        <button class="btn sm" data-move="1" data-kind="duty" data-id="${id}" title="아래 행과 당직자 교환">순서 ▼</button>
+        <button class="btn sm" data-rotate data-kind="duty" data-id="${id}">여기부터 재배정</button>
+        <span class="grow"></span><button class="btn primary" data-edit="${id}" data-kind="duty">수정</button>` : ''
+    });
+  } else {
+    const r = state.prRows.find(x => x.id === id); if (!r) return;
+    showModal({
+      title: '기도 담당 상세',
+      body: `<div class="d-title">${esc(prNames(r))}</div>
+        <div class="d-badges"><span class="bd acc">${esc(r.category)}</span>${dayBadge(r.pray_date)}${newBadge(r)}</div>
+        <dl class="meta"><dt>날짜</dt><dd>${fmt(r.pray_date)}</dd></dl>`,
+      footer: isMaster() ? `<button class="btn danger ghost" data-del="${id}" data-kind="pray">삭제</button>
+        <button class="btn sm" data-move="-1" data-kind="pray" data-id="${id}" title="위 행과 담당자 교환">순서 ▲</button>
+        <button class="btn sm" data-move="1" data-kind="pray" data-id="${id}" title="아래 행과 담당자 교환">순서 ▼</button>
+        <button class="btn sm" data-rotate data-kind="pray" data-id="${id}">여기부터 재배정</button>
+        <span class="grow"></span><button class="btn primary" data-edit="${id}" data-kind="pray">수정</button>` : ''
+    });
+  }
+}
+
+/* =====================  스케줄: 등록 / 수정  ===================== */
+const catOptions = sel => '<option value="">항목 선택</option>' +
+  state.cats.map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+
+function openSchForm(item){
+  const isEdit = !!item;
+  const d = item || { due_date: today(), category_id: null, title: '', content: '' };
+  showModal({
+    title: isEdit ? '일정 수정' : '새 일정', sticky: true,
+    body: `<form id="fs" novalidate data-id="${isEdit ? item.id : ''}">
+      <div class="fld"><label for="f-due">마감일</label><input class="in" id="f-due" type="date" value="${esc(d.due_date || today())}" required></div>
+      <div class="fld"><label for="f-cat">항목</label>
+        <div class="inl"><select class="in" id="f-cat">${catOptions(d.category_id)}</select><button class="btn" type="button" data-act="cats">＋ 항목</button></div></div>
+      <div class="fld"><label for="f-title">제목</label><input class="in" id="f-title" maxlength="100" value="${esc(d.title)}" placeholder="제목 입력" required ${isEdit ? '' : 'autofocus'}></div>
+      <div class="fld"><label for="f-content">내용</label><textarea class="in" id="f-content" rows="5" placeholder="내용 입력">${esc(d.content || '')}</textarea></div>
+      <div class="ferr" id="ferr" role="alert"></div>
+    </form>`,
+    footer: `<button class="btn ghost neutral" type="button" data-reset-form>초기화</button><span class="grow"></span>
+      <button class="btn" type="button" data-close="1">취소</button><button class="btn primary" type="submit" form="fs" id="f-save">${isEdit ? '저장' : '추가'}</button>`
+  });
+  if (isEdit) $('#f-title').focus();
+}
+async function submitSch(form){
+  const id = form.dataset.id ? Number(form.dataset.id) : null;
+  const err = m => { $('#ferr').textContent = m; };
+  const title = $('#f-title').value.trim(), due = $('#f-due').value;
+  if (!due) return err('마감일을 선택해 주세요.');
+  if (!title){ $('#f-title').focus(); return err('제목을 입력해 주세요.'); }
+  const p = { category_id: $('#f-cat').value ? Number($('#f-cat').value) : null, title, content: $('#f-content').value, due_date: due };
+  const btn = $('#f-save'); btn.disabled = true;
+  try {
+    if (id){
+      const meta = editMeta(state.sch.find(x => x.id === id), p);
+      if (!meta){ btn.disabled = false; return err('변경된 내용이 없습니다.'); }
+      await mutate(sb.from('schedules').update({ ...p, ...meta }).eq('id', id));
+    } else {
+      await run(sb.from('schedules').insert({ ...p, input_date: today(), updated_by: CID }));   // 입력일자: 기록용(자동)
+    }
+    closeModal('all'); toast(id ? '수정했어요' : '추가했어요'); loadSch();
+  } catch { btn.disabled = false; }
+}
+async function toggleDone(id){
+  const r = state.sch.find(x => x.id === id); if (!r) return false;
+  const next = !r.done;
+  try {
+    await mutate(sb.from('schedules').update({ done: next, done_at: next ? new Date().toISOString() : null, updated_by: CID }).eq('id', id));
+  } catch { return false; }
+  toast(next ? '완료 처리했어요' : '완료를 해제했어요'); loadSch(); return true;
+}
+
+/* =====================  당직: 등록 / 수정 / 프리셋  ===================== */
+const presetLabel = p => `${p.is_default ? '★ ' : ''}${p.name} (${fmtT(p.start_time)}~${fmtT(p.end_time)})`;
+const presetOptions = sel => '<option value="">프리셋 선택</option>' +
+  state.presets.map(p => `<option value="${p.id}" ${String(p.id) === String(sel) ? 'selected' : ''}>${esc(presetLabel(p))}</option>`).join('');
+const quickPicks = (arr, attr = 'data-pick') =>
+  arr.length ? `<div class="qps">${arr.map(w => `<button class="qp" type="button" ${attr}="${esc(w.name)}">${esc(w.name)}</button>`).join('')}</div>` : '';
+
+function openDutyForm(item){
+  const isEdit = !!item;
+  const dp = state.presets.find(p => p.is_default);
+  const d = item || { duty_date: today(), start_time: dp ? dp.start_time : '09:00', end_time: dp ? dp.end_time : '17:00', worker_name: '' };
+  showModal({
+    title: isEdit ? '당직 수정' : '새 당직', sticky: true,
+    body: `<form id="fd" novalidate data-id="${isEdit ? item.id : ''}">
+      <div class="fld"><label for="f-date">당직일자</label><input class="in" id="f-date" type="date" value="${esc(d.duty_date)}" required></div>
+      <div class="row2 fld">
+        <div><label class="lbl" for="f-start">시작 시간</label><input class="in" id="f-start" type="time" value="${esc(d.start_time)}" required></div>
+        <div><label class="lbl" for="f-end">마침 시간</label><input class="in" id="f-end" type="time" value="${esc(d.end_time)}" required></div>
+      </div>
+      <div class="fld"><label for="f-preset">근무시간 프리셋</label>
+        <select class="in" id="f-preset">${presetOptions(!isEdit && dp ? dp.id : '')}</select>
+        <div class="qps">
+          <button class="qp" type="button" data-preset="save">현재 시간 저장</button>
+          <button class="qp" type="button" data-preset="def">기본으로 설정</button>
+          <button class="qp" type="button" data-preset="del">프리셋 삭제</button>
+        </div></div>
+      <div class="fld"><label for="f-name">당직자</label>
+        <input class="in" id="f-name" maxlength="30" value="${esc(d.worker_name)}" placeholder="이름 입력 / 아래에서 선택" ${isEdit ? '' : 'autofocus'}>
+        ${quickPicks(state.workers)}</div>
+      <div class="ferr" id="ferr" role="alert"></div>
+    </form>`,
+    footer: `<span class="grow"></span><button class="btn" type="button" data-close="1">취소</button>
+      <button class="btn primary" type="submit" form="fd" id="f-save">${isEdit ? '저장' : '추가'}</button>`
+  });
+}
+async function submitDuty(form){
+  const id = form.dataset.id ? Number(form.dataset.id) : null;
+  const err = m => { $('#ferr').textContent = m; };
+  const p = { duty_date: $('#f-date').value, start_time: $('#f-start').value, end_time: $('#f-end').value, worker_name: $('#f-name').value.trim() };
+  if (!p.duty_date) return err('당직일자를 선택해 주세요.');
+  if (!p.start_time || !p.end_time) return err('근무시간을 입력해 주세요.');
+  if (!p.worker_name) return err('당직자를 입력해 주세요.');
+  const btn = $('#f-save'); btn.disabled = true;
+  try {
+    if (id){
+      const meta = editMeta(state.duties.find(x => x.id === id), p);
+      if (!meta){ btn.disabled = false; return err('변경된 내용이 없습니다.'); }
+      await mutate(sb.from('duty_schedule').update({ ...p, ...meta }).eq('id', id));
+    } else {
+      await run(sb.from('duty_schedule').insert({ ...p, updated_by: CID }));
+    }
+    closeModal('all'); toast(id ? '수정했어요' : '추가했어요'); loadDuty();
+  } catch { btn.disabled = false; }
+}
+async function reloadPresets(selectId){
+  try { state.presets = await run(sb.from('duty_presets').select('*').order('id')); } catch { return; }
+  const sel = $('#f-preset'); if (sel) sel.innerHTML = presetOptions(selectId ?? sel.value);
+}
+async function presetAction(kind){
+  const sel = $('#f-preset');
+  if (kind === 'save'){
+    const s = $('#f-start').value, e = $('#f-end').value;
+    if (!s || !e) return toast('근무시간을 입력해 주세요', 'bad');
+    const name = await askBox({ title: '프리셋 이름', message: `${fmtT(s)} ~ ${fmtT(e)} 을(를) 저장합니다.`, input: { placeholder: '예: 평일, 공휴일' }, ok: '저장' });
+    if (!name) return;
+    const dup = state.presets.find(p => p.name === name);
+    if (dup){
+      if (!await askBox({ title: '덮어쓰기', message: `'${esc(name)}' 프리셋이 이미 있습니다. 현재 시간으로 덮어쓸까요?`, ok: '덮어쓰기' })) return;
+      await run(sb.from('duty_presets').update({ start_time: s, end_time: e }).eq('id', dup.id));
+      await reloadPresets(dup.id);
+    } else {
+      const rows = await run(sb.from('duty_presets').insert({ name, start_time: s, end_time: e, is_default: !state.presets.length }).select());
+      await reloadPresets(rows[0].id);
+    }
+    toast('프리셋을 저장했어요');
+  } else if (kind === 'def'){
+    if (!sel.value) return toast('프리셋을 선택해 주세요', 'bad');
+    await run(sb.from('duty_presets').update({ is_default: false }).neq('id', sel.value));
+    await run(sb.from('duty_presets').update({ is_default: true }).eq('id', sel.value));
+    await reloadPresets(sel.value); toast('기본 프리셋으로 설정했어요');
+  } else {
+    if (!sel.value) return toast('프리셋을 선택해 주세요', 'bad');
+    if (!await askBox({ title: '프리셋 삭제', message: '이 프리셋을 삭제할까요?', ok: '삭제', danger: true })) return;
+    await run(sb.from('duty_presets').delete().eq('id', sel.value));
+    await reloadPresets(''); toast('삭제했어요');
+  }
+}
+
+/* =====================  기도 담당: 등록 / 수정  ===================== */
+function openPrayForm(item){
+  const isEdit = !!item;
+  const d = item || { pray_date: today(), category: state.prayCat, worker1: '', worker2: '' };
+  showModal({
+    title: isEdit ? '기도 담당 수정' : '새 기도 담당', sticky: true,
+    body: `<form id="fp" novalidate data-id="${isEdit ? item.id : ''}">
+      <div class="fld"><span class="lbl">구분</span><div class="rd">
+        ${['새벽기도', '저녁기도'].map(c => `<label><input type="radio" name="f-pcat" value="${c}" ${d.category === c ? 'checked' : ''}><span>${c}</span></label>`).join('')}
+      </div></div>
+      <div class="fld"><label for="f-pdate">날짜</label><input class="in" id="f-pdate" type="date" value="${esc(d.pray_date)}" required></div>
+      <div class="fld"><label for="f-w1">담당자1</label><input class="in" id="f-w1" maxlength="30" value="${esc(d.worker1 || '')}" placeholder="이름 입력 / 아래에서 선택" ${isEdit ? '' : 'autofocus'}></div>
+      <div class="fld"><label for="f-w2">담당자2 <span class="muted" style="font-weight:400">(선택)</span></label><input class="in" id="f-w2" maxlength="30" value="${esc(d.worker2 || '')}" placeholder="이름 입력 / 아래에서 선택">
+        ${quickPicks(state.prWorkers, 'data-pickw')}</div>
+      <div class="ferr" id="ferr" role="alert"></div>
+    </form>`,
+    footer: `<span class="grow"></span><button class="btn" type="button" data-close="1">취소</button>
+      <button class="btn primary" type="submit" form="fp" id="f-save">${isEdit ? '저장' : '추가'}</button>`
+  });
+}
+async function submitPray(form){
+  const id = form.dataset.id ? Number(form.dataset.id) : null;
+  const err = m => { $('#ferr').textContent = m; };
+  let w1 = $('#f-w1').value.trim(), w2 = $('#f-w2').value.trim();
+  if (!w1 && w2){ w1 = w2; w2 = ''; }
+  const p = { pray_date: $('#f-pdate').value, category: form.querySelector('input[name=f-pcat]:checked').value, worker1: w1, worker2: w2 };
+  if (!p.pray_date) return err('날짜를 선택해 주세요.');
+  if (!w1) return err('담당자를 입력해 주세요.');
+  if (w1 === w2) return err('담당자1과 2가 같습니다.');
+  if (state.prRows.some(r => r.id !== id && r.pray_date === p.pray_date && r.category === p.category))
+    return err('그 날짜에 이미 일정이 있습니다. 목록에서 선택해 수정해 주세요.');
+  const btn = $('#f-save'); btn.disabled = true;
+  try {
+    if (id){
+      const meta = editMeta(state.prRows.find(x => x.id === id), p);
+      if (!meta){ btn.disabled = false; return err('변경된 내용이 없습니다.'); }
+      await mutate(sb.from('prayer_schedule').update({ ...p, ...meta }).eq('id', id));
+    } else {
+      await run(sb.from('prayer_schedule').insert({ ...p, updated_by: CID }));
+    }
+    closeModal('all'); toast(id ? '수정했어요' : '추가했어요'); loadPray();
+  } catch { btn.disabled = false; }
+}
+
+/* =====================  삭제 / 순서 이동 / 재배정  ===================== */
+const TABLE = { sch: 'schedules', duty: 'duty_schedule', pray: 'prayer_schedule' };
+const LABEL = { sch: '일정', duty: '당직', pray: '기도 담당' };
+async function doDelete(kind, id){
+  if (!await askBox({ title: `${LABEL[kind]} 삭제`, message: '정말 삭제할까요?<br><span class="muted">삭제하면 되돌릴 수 없어요.</span>', ok: '삭제', danger: true })) return;
+  try { await mutate(sb.from(TABLE[kind]).delete().eq('id', id)); } catch { return; }
+  closeModal('all'); toast('삭제했어요'); LOADERS[kind]();
+}
+async function moveRow(kind, id, d){
+  const list = kind === 'duty' ? state.duties : prayList();
+  const i = list.findIndex(x => x.id === id), j = i + d;
+  if (j < 0 || j >= list.length) return toast(d < 0 ? '맨 위입니다' : '맨 아래입니다', 'bad');
+  const a = list[i], b = list[j];
+  const fields = kind === 'duty' ? ['worker_name'] : ['worker1', 'worker2'];
+  const pa = {}, pb = {};
+  fields.forEach(f => { pa[f] = b[f]; pb[f] = a[f]; });
+  try {
+    await Promise.all([
+      mutate(sb.from(TABLE[kind]).update({ ...pa, ...editMeta(a, pa) }).eq('id', a.id)),
+      mutate(sb.from(TABLE[kind]).update({ ...pb, ...editMeta(b, pb) }).eq('id', b.id))
+    ]);
+  } catch { return; }
+  closeModal('all'); toast(kind === 'duty' ? '당직자를 교환했어요' : '담당자를 교환했어요'); LOADERS[kind]();
+}
+async function rotateFrom(kind, id){
+  if (kind === 'duty'){
+    if (!state.workers.length) return toast('먼저 당직자를 등록해 주세요', 'bad');
+    const i = state.duties.findIndex(x => x.id === id), n = state.workers.length;
+    let idx = state.workers.findIndex(w => w.name === state.duties[i].worker_name); if (idx < 0) idx = 0;
+    const targets = state.duties.slice(i);
+    if (!await askBox({ title: '순환 재배정', message: `선택한 행부터 ${targets.length}건의 당직자를<br>등록된 기본 순서대로 다시 배정할까요?`, ok: '재배정' })) return;
+    try {
+      await Promise.all(targets.map((r, k) => {
+        const nn = state.workers[(idx + k) % n].name;
+        if (nn === r.worker_name) return null;
+        return mutate(sb.from('duty_schedule').update({ worker_name: nn, ...editMeta(r, { worker_name: nn }) }).eq('id', r.id));
+      }));
+    } catch { return; }
+    closeModal('all'); toast('재배정했어요'); loadDuty();
+  } else {
+    if (!state.prWorkers.length) return toast('먼저 담당자를 등록해 주세요', 'bad');
+    const list = prayList(), i = list.findIndex(x => x.id === id), n = state.prWorkers.length;
+    let idx = state.prWorkers.findIndex(w => w.name === list[i].worker1); if (idx < 0) idx = 0;
+    const targets = list.slice(i);
+    if (!await askBox({ title: '순환 재배정', message: `선택한 행부터 ${targets.length}건을<br>기본 순서대로 2명씩 다시 배정할까요?`, ok: '재배정' })) return;
+    try {
+      await Promise.all(targets.map(r => {
+        const w1 = state.prWorkers[idx % n].name; idx++;
+        let w2 = ''; if (n > 1){ w2 = state.prWorkers[idx % n].name; idx++; }
+        if (w1 === r.worker1 && w2 === (r.worker2 || '')) return null;
+        const p = { worker1: w1, worker2: w2 };
+        return mutate(sb.from('prayer_schedule').update({ ...p, ...editMeta(r, p) }).eq('id', r.id));
+      }));
+    } catch { return; }
+    closeModal('all'); toast('재배정했어요'); loadPray();
+  }
+}
+
+/* =====================  명단 / 우선순위 관리 (항목 · 당직자 · 기도 담당자)  ===================== */
+const ROSTER = {
+  cat:  { table: 'categories',     title: '항목 관리 · 우선순위', ph: '새 항목 이름', get: () => state.cats,      note: '항목을 누른 뒤 ▲▼ 로 우선순위(위가 높음)를 조정하고 [저장]을 누르세요. 항목을 삭제해도 기존 일정은 남고 항목만 비워집니다.' },
+  duty: { table: 'duty_workers',   title: '당직자 명단 · 기본 순서', ph: '새 당직자 이름', get: () => state.workers,   note: '당직자를 누른 뒤 ▲▼ 로 순서를 바꾸고 [저장]을 누르세요. 월요일 일괄 생성과 재배정은 이 순서를 따릅니다.' },
+  pray: { table: 'prayer_workers', title: '기도 담당자 명단 · 기본 순서', ph: '새 담당자 이름', get: () => state.prWorkers, note: '담당자를 누른 뒤 ▲▼ 로 순서를 바꾸고 [저장]을 누르세요. 기간 일괄 생성과 재배정은 이 순서를 따릅니다.' }
+};
+const ros = { kind: null, work: [], sel: null };
+function renderRoster(){
+  $('#rosList').innerHTML = ros.work.length
+    ? ros.work.map((w, i) => `<div class="item ${i === ros.sel ? 'sel' : ''}" data-ri="${i}"><b>${i + 1}</b><span>${esc(w.name)}</span></div>`).join('')
+    : '<div class="empty" style="padding:24px">등록된 항목이 없습니다</div>';
+}
+function openRoster(kind){
+  const R = ROSTER[kind];
+  ros.kind = kind; ros.work = R.get().map(w => ({ id: w.id, name: w.name })); ros.sel = null;
+  showModal({
+    title: R.title, layer: 2, sticky: true,
+    body: `<div class="inl" style="margin-bottom:12px"><input class="in" id="rosNew" maxlength="30" placeholder="${R.ph}"><button class="btn" type="button" id="rosAdd">추가</button></div>
+      <div id="rosList"></div><p class="note">${R.note}</p>`,
+    footer: `<button class="btn sm" type="button" id="rosUp" style="width:48px">▲</button><button class="btn sm" type="button" id="rosDown" style="width:48px">▼</button>
+      <button class="btn danger sm" type="button" id="rosDel">삭제</button><span class="grow"></span>
+      <button class="btn" type="button" data-close="2">닫기</button><button class="btn primary" type="button" id="rosSave">저장</button>`
+  });
+  renderRoster();
+}
+function rosterAdd(){
+  const n = $('#rosNew').value.trim(); if (!n) return;
+  if (ros.work.some(w => w.name === n)) return toast('이미 있는 이름입니다', 'bad');
+  ros.work.push({ id: null, name: n }); $('#rosNew').value = ''; ros.sel = ros.work.length - 1; renderRoster();
+}
+function rosterMove(d){
+  if (ros.sel === null) return toast('먼저 항목을 선택해 주세요', 'bad');
+  const j = ros.sel + d; if (j < 0 || j >= ros.work.length) return;
+  [ros.work[ros.sel], ros.work[j]] = [ros.work[j], ros.work[ros.sel]]; ros.sel = j; renderRoster();
+}
+function rosterDel(){
+  if (ros.sel === null) return toast('먼저 항목을 선택해 주세요', 'bad');
+  ros.work.splice(ros.sel, 1); ros.sel = null; renderRoster();
+}
+async function rosterSave(){
+  const R = ROSTER[ros.kind], old = R.get();
+  try {
+    const keep = ros.work.filter(w => w.id).map(w => w.id);
+    const del = old.filter(w => !keep.includes(w.id)).map(w => w.id);
+    if (del.length) await run(sb.from(R.table).delete().in('id', del));
+    for (let i = 0; i < ros.work.length; i++){
+      const w = ros.work[i];
+      if (w.id) await run(sb.from(R.table).update({ sort_order: i }).eq('id', w.id));
+      else await run(sb.from(R.table).insert({ name: w.name, sort_order: i }));
+    }
+  } catch { return; }
+  toast('저장했어요');
+  const kind = ros.kind;
+  closeModal(2);
+  if (kind === 'cat'){
+    await loadSch();
+    const sel = $('#f-cat'); if (sel) sel.innerHTML = catOptions(sel.value ? Number(sel.value) : null);
+  } else if (kind === 'duty') loadDuty(); else loadPray();
+}
+
+/* =====================  일괄 생성  ===================== */
+function dutyGenStart(){
+  const prev = state.duties.length ? state.duties[state.duties.length - 1] : null;
+  const [y, m, d] = (prev ? prev.duty_date : today()).split('-').map(Number);
+  const s = new Date(y, m - 1, d);
+  s.setDate(s.getDate() + (((8 - s.getDay()) % 7) || 7));     // 기준일보다 뒤의 첫 월요일
+  return { start: s, prev };
+}
+function openGenDuty(){
+  if (!state.workers.length) return toast('먼저 당직자를 등록해 주세요', 'bad');
+  const { start, prev } = dutyGenStart();
+  const dp = state.presets.find(p => p.is_default);
+  showModal({
+    title: '월요일 일괄 생성', sticky: true,
+    body: `<form id="gd" novalidate>
+      <p class="note" style="margin:0 0 14px">${prev ? `표의 마지막 날짜(${fmt(prev.duty_date)}) 다음 월요일` : '오늘 이후 첫 월요일'}인
+        <b>${fmt(toStr(start))}</b> 부터 생성합니다.</p>
+      <div class="fld"><label for="g-weeks">주 수 (1~12)</label><input class="in" id="g-weeks" type="number" min="1" max="12" value="4" inputmode="numeric"></div>
+      <div class="fld"><label for="g-start">시작 당직자</label><select class="in" id="g-start">
+        <option value="">이어서 (마지막 당직 다음 사람부터)</option>
+        ${state.workers.map((w, i) => `<option value="${w.id}">${i + 1}. ${esc(w.name)}부터</option>`).join('')}</select></div>
+      <div class="row2 fld">
+        <div><label class="lbl" for="g-s">시작 시간</label><input class="in" id="g-s" type="time" value="${dp ? dp.start_time : '09:00'}"></div>
+        <div><label class="lbl" for="g-e">마침 시간</label><input class="in" id="g-e" type="time" value="${dp ? dp.end_time : '17:00'}"></div>
+      </div>
+      <p class="note">'당직자 기본 순서'대로 배정합니다. 공휴일은 [＋ 새 당직]으로 직접 추가해 주세요.</p>
+      <div class="ferr" id="ferr" role="alert"></div></form>`,
+    footer: `<span class="grow"></span><button class="btn" type="button" data-close="1">취소</button><button class="btn primary" type="submit" form="gd" id="f-save">생성</button>`
+  });
+}
+async function submitGenDuty(){
+  const err = m => { $('#ferr').textContent = m; };
+  const weeks = Number($('#g-weeks').value);
+  if (!Number.isInteger(weeks) || weeks < 1 || weeks > 12) return err('주 수는 1~12 사이로 입력해 주세요.');
+  const { start, prev } = dutyGenStart(), n = state.workers.length;
+  const pick = $('#g-start').value;
+  let idx = pick !== '' ? state.workers.findIndex(w => String(w.id) === pick)
+          : prev ? state.workers.findIndex(w => w.name === prev.worker_name) + 1 : 0;
+  if (idx < 0) idx = 0;
+  const exist = new Set(state.duties.map(r => r.duty_date)), rows = [];
+  for (let w = 0; w < weeks; w++){
+    const s = toStr(addDays(7 * w, start));
+    if (exist.has(s)) continue;
+    rows.push({ duty_date: s, start_time: $('#g-s').value || '09:00', end_time: $('#g-e').value || '17:00', worker_name: state.workers[idx % n].name, updated_by: CID });
+    idx++;
+  }
+  if (!rows.length) return err('생성할 월요일이 없습니다.');
+  if (!await askBox({ title: '일괄 생성', message: `${dot(rows[0].duty_date)} ~ ${dot(rows[rows.length - 1].duty_date)}<br>월요일 ${rows.length}건을 생성할까요?`, ok: '생성' })) return;
+  $('#f-save').disabled = true;
+  try { await run(sb.from('duty_schedule').insert(rows)); } catch { $('#f-save').disabled = false; return; }
+  closeModal('all'); toast(`${rows.length}건 생성했어요`); loadDuty();
+}
+function openGenPray(){
+  if (!state.prWorkers.length) return toast('먼저 담당자를 등록해 주세요', 'bad');
+  showModal({
+    title: '기간 일괄 생성', sticky: true,
+    body: `<form id="gp" novalidate>
+      <div class="fld"><span class="lbl">구분</span><div class="rd">
+        ${['새벽기도', '저녁기도'].map(c => `<label><input type="radio" name="g-pcat" value="${c}" ${state.prayCat === c ? 'checked' : ''}><span>${c}</span></label>`).join('')}</div></div>
+      <div class="row2 fld">
+        <div><label class="lbl" for="g-from">시작일</label><input class="in" id="g-from" type="date" value="${today()}"></div>
+        <div><label class="lbl" for="g-to">종료일</label><input class="in" id="g-to" type="date" value="${toStr(addDays(13))}"></div>
+      </div>
+      <div class="fld"><label for="g-pstart">시작 담당자</label><select class="in" id="g-pstart">
+        <option value="">이어서 (직전 일정 다음 사람부터)</option>
+        ${state.prWorkers.map((w, i) => `<option value="${w.id}">${i + 1}. ${esc(w.name)}부터</option>`).join('')}</select></div>
+      <p class="note">선택한 기간의 매일을 '담당자 기본 순서'대로 2명씩 묶어 배정합니다. 이미 있는 날짜는 건너뜁니다.</p>
+      <div class="ferr" id="ferr" role="alert"></div></form>`,
+    footer: `<span class="grow"></span><button class="btn" type="button" data-close="1">취소</button><button class="btn primary" type="submit" form="gp" id="f-save">생성</button>`
+  });
+}
+async function submitGenPray(form){
+  const err = m => { $('#ferr').textContent = m; };
+  const from = $('#g-from').value, to = $('#g-to').value;
+  if (!from || !to || from > to) return err('기간을 올바르게 선택해 주세요.');
+  const c = form.querySelector('input[name=g-pcat]:checked').value, W = state.prWorkers, n = W.length;
+  const pick = $('#g-pstart').value;
+  let idx;
+  if (pick !== '') idx = W.findIndex(w => String(w.id) === pick);
+  else {
+    const prev = state.prRows.filter(r => r.category === c && r.pray_date < from).pop();
+    const last = prev ? (prev.worker2 || prev.worker1) : null;
+    idx = last ? W.findIndex(w => w.name === last) + 1 : 0;
+  }
+  if (idx < 0) idx = 0;
+  const exist = new Set(state.prRows.filter(r => r.category === c).map(r => r.pray_date)), rows = [];
+  for (let d = parse(from); toStr(d) <= to; d.setDate(d.getDate() + 1)){
+    const s = toStr(d); if (exist.has(s)) continue;
+    const w1 = W[idx % n].name; idx++;
+    let w2 = ''; if (n > 1){ w2 = W[idx % n].name; idx++; }
+    rows.push({ pray_date: s, category: c, worker1: w1, worker2: w2, updated_by: CID });
+  }
+  if (!rows.length) return err('생성할 날짜가 없습니다.');
+  if (rows.length > 366) return err('한 번에 366일까지만 생성할 수 있어요.');
+  if (!await askBox({ title: '일괄 생성', message: `${c} ${rows.length}일치를 생성할까요?`, ok: '생성' })) return;
+  $('#f-save').disabled = true;
+  try { await run(sb.from('prayer_schedule').insert(rows)); } catch { $('#f-save').disabled = false; return; }
+  state.prayCat = c; ls.set('prayCat', c);
+  closeModal('all'); toast(`${rows.length}건 생성했어요`); loadPray();
+}
+function openPast(){
+  const from = toStr(addDays(-14)), t = today(), c = state.prayCat;
+  const rows = state.prRows.filter(r => r.category === c && r.pray_date >= from && r.pray_date < t)
+    .sort((a, b) => b.pray_date.localeCompare(a.pray_date));
+  showModal({
+    title: `${c} · 지난 2주`,
+    body: `<table class="ptbl"><thead><tr><th>날짜 (요일)</th><th>담당자</th></tr></thead><tbody>${
+      rows.length ? rows.map(r => `<tr><td>${fmt(r.pray_date)}</td><td>${esc(prNames(r))}</td></tr>`).join('')
+        : '<tr><td colspan="2" class="empty" style="padding:28px">지난 2주간 기록이 없습니다</td></tr>'}</tbody></table>`,
+    footer: '<span class="grow"></span><button class="btn" data-close="1">닫기</button>'
+  });
+}
+
+/* =====================  로그인 / 회원가입 / 권한  ===================== */
+function applyRole(){
+  document.body.classList.toggle('role-user', !!ME && !isMaster());
+}
+function setAuthMode(m){
+  authMode = m;
+  const su = m === 'signup';
+  $('#suFields').hidden = !su;
+  $('#loginBtn').textContent = su ? '회원가입' : '로그인';
+  $('#loginSwitch').textContent = su ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입';
+  $('#lpw').autocomplete = su ? 'new-password' : 'current-password';
+  $('#loginErr').textContent = '';
+}
+function showLogin(){
+  closeModal('all');
+  $('#app').hidden = true; $('#login').hidden = false;
+  setAuthMode('login');
+  $('#lid').value = ls.get('lastId') || '';
+  $('#lpw').value = ''; $('#lpw2').value = '';
+  setTimeout(() => ($('#lid').value ? $('#lpw') : $('#lid')).focus(), 0);
+}
+function enterApp(){
+  $('#login').hidden = true; $('#app').hidden = false;
+  applyRole(); render(); reloadAll();
+  if (!appStarted){ appStarted = true; startRealtime(); }
+}
+$('#loginSwitch').addEventListener('click', () => setAuthMode(authMode === 'login' ? 'signup' : 'login'));
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const errBox = $('#loginErr'), id = $('#lid').value.trim(), pw = $('#lpw').value;
+  if (!sb) return errBox.textContent = '서버 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';
+  if (!id || !pw) return errBox.textContent = '아이디와 비밀번호를 입력해 주세요.';
+  $('#loginBtn').disabled = true; errBox.textContent = '';
+  try {
+    let res;
+    if (authMode === 'signup'){
+      if (pw !== $('#lpw2').value) throw new Error('비밀번호 확인이 일치하지 않아요.');
+      res = await rpc('app_signup', { p_id: id, p_pw: pw, p_position: $('#lpos').value.trim(), p_phone: $('#ltel').value.trim() });
+    } else {
+      res = await rpc('app_login', { p_id: id, p_pw: pw });
+    }
+    TOKEN = res.token; store.set(res.token, $('#lauto').checked);
+    ls.set('lastId', id);
+    ME = res; enterApp();
+    toast(authMode === 'signup'
+      ? (res.role_id === 1 ? '가입 완료! 첫 가입자라 마스터 권한이 부여되었어요' : '가입이 완료되었어요')
+      : `${res.login_id}님 환영합니다`);
+  } catch (err) {
+    errBox.textContent = err.message || '처리하지 못했어요.';
+    const card = $('#loginForm'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    $('#lpw').value = '';
+  } finally { $('#loginBtn').disabled = false; }
+});
+async function boot(){
+  if (!sb){ showLogin(); $('#loginErr').textContent = '서버 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.'; return; }
+  if (TOKEN){
+    try {
+      ME = await rpc('app_me');
+      if (!ME){ TOKEN = null; store.clear(); }               // 만료되었거나 삭제된 로그인
+    } catch { ME = null; showLogin(); $('#loginErr').textContent = '서버에 연결하지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.'; return; }
+  }
+  if (ME) enterApp(); else showLogin();
+}
+async function refreshMe(){
+  if (!sb || !TOKEN) return;
+  try {
+    const m = await rpc('app_me');
+    if (!m){ store.clear(); location.reload(); return; }
+    const changed = m.role_id !== ME.role_id;
+    ME = m; applyRole(); if (changed) render();
+  } catch {}
+}
+async function doLogout(){
+  if (!await askBox({ title: '로그아웃', message: '로그아웃할까요?', ok: '로그아웃' })) return;
+  try { await rpc('app_logout'); } catch {}
+  store.clear(); location.reload();
+}
+
+/* ---- 회원 관리 (마스터) ---- */
+async function openMembers(){
+  showModal({
+    title: '회원 관리',
+    body: '<div id="memList"><div class="empty" style="padding:30px">불러오는 중…</div></div><p class="note">권한 1 = 마스터(모든 기능), 2 = 유저(조회만). 마스터는 최소 1명이 있어야 합니다.</p>',
+    footer: '<span class="grow"></span><button class="btn" data-close="1">닫기</button>'
+  });
+  loadMembers();
+}
+async function loadMembers(){
+  let list;
+  try { list = await rpc('app_list_members'); } catch (e) { return toast('오류: ' + e.message, 'bad'); }
+  const box = $('#memList'); if (!box) return;
+  box.innerHTML = list.map(m => `<div class="mem" data-id="${m.id}">
+      <div class="l1">${esc(m.login_id)}${m.position ? ` (${esc(m.position)})` : ''}${m.id === ME.id ? ' · 나' : ''}</div>
+      <div class="l2">${esc(m.phone || '전화번호 없음')}</div>
+      <div class="acts">
+        <select class="in" data-role>
+          <option value="1" ${m.role_id === 1 ? 'selected' : ''}>1 마스터</option>
+          <option value="2" ${m.role_id === 2 ? 'selected' : ''}>2 유저</option>
+        </select>
+        <button class="btn sm" data-mem="pw">비번 초기화</button>
+        <button class="btn sm danger" data-mem="del">삭제</button>
+      </div></div>`).join('');
+}
+
+/* =====================  알림 / 실시간  ===================== */
 // 알림 형식: 1줄 "교회 스케줄 알림. (추가)" / 2줄 제목 / 3줄 내용
-async function notify(head, line2, line3) {
+async function notify(head, line2, line3){
   const body = [line2, line3].filter(Boolean).join('\n');
-  const t = $('toast'); t.style.whiteSpace = 'pre-line'; t.style.textAlign = 'left';
   toast(head + '\n' + body);
   try {
     if (!('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
     const opt = { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'church-' + Date.now() };
-    // 안드로이드 크롬은 new Notification()을 지원하지 않아 서비스워커로 띄웁니다
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator){            // 안드로이드 크롬은 서비스워커로 띄워야 함
       const reg = await navigator.serviceWorker.getRegistration();
       if (reg) return reg.showNotification(head, opt);
     }
     new Notification(head, opt);
-  } catch (e) {}
+  } catch {}
 }
-const clip = (s, n = 80) => { s = (s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; };
-$('bell').onclick = async () => {
-  if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않습니다 (크롬에서 설치한 앱으로 열어보세요)');
+async function askNotify(){
+  if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않아요. 크롬에서 설치한 앱으로 열어 보세요.', 'bad');
   const r = await Notification.requestPermission();
-  if (r !== 'granted') return toast('알림이 차단되었습니다. 브라우저 사이트 설정에서 알림을 허용해주세요');
-  toast('알림이 허용되었습니다. 3초 뒤 테스트 알림을 보냅니다 (앱을 닫거나 다른 화면으로 나가보세요)');
+  if (r !== 'granted') return toast('알림이 차단되었어요. 브라우저 사이트 설정에서 허용해 주세요.', 'bad');
+  toast('알림을 허용했어요. 3초 뒤 테스트 알림을 보냅니다.\n앱을 닫거나 다른 화면으로 나가 보세요.');
   setTimeout(async () => {
     try {
       const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
       const opt = { body: '테스트 제목\n테스트 내용', icon: 'icon-192.png', tag: 'church-test' };
       if (reg) reg.showNotification('교회 스케줄 알림. (테스트)', opt); else new Notification('교회 스케줄 알림. (테스트)', opt);
-    } catch (e) { toast('알림 표시 실패: ' + e.message); }
+    } catch (e) { toast('알림 표시 실패: ' + e.message, 'bad'); }
   }, 3000);
-};
+}
 let rtTimer;
-function startRealtime() {
+function startRealtime(){
   if (!sb) return;
-  const refresh = t => { clearTimeout(rtTimer); rtTimer = setTimeout(() => { t === 'schedules' ? loadSch() : t === 'duty' ? loadDuty() : loadPray(); }, 300); };
+  const refresh = k => { clearTimeout(rtTimer); rtTimer = setTimeout(() => LOADERS[k](), 300); };
   sb.channel('rt-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, pl => {
-      refresh('schedules');
+      refresh('sch');
       const r = pl.new || {};
       if (pl.eventType === 'DELETE' || r.updated_by === CID) return;
       let act = '추가';
-      if (pl.eventType === 'UPDATE') {
+      if (pl.eventType === 'UPDATE'){
         const edited = r.updated_at && Date.now() - new Date(r.updated_at) < 15000;
         act = edited ? '수정' : (r.done ? '완료' : '완료 해제');
       }
@@ -509,768 +1242,163 @@ function startRealtime() {
       refresh('duty');
       const r = pl.new || {};
       if (pl.eventType === 'DELETE' || r.updated_by === CID) return;
-      notify(`교회 당직 알림. (${pl.eventType === 'INSERT' ? '추가' : '수정'})`,
-        dot(r.duty_date || ''), `${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}  ${r.worker_name || ''}`);
+      notify(`교회 당직 알림. (${pl.eventType === 'INSERT' ? '추가' : '수정'})`, dot(r.duty_date || ''), `${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}  ${r.worker_name || ''}`);
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'prayer_schedule' }, pl => {
       refresh('pray');
       const r = pl.new || {};
       if (pl.eventType === 'DELETE' || r.updated_by === CID) return;
-      notify(`교회 기도 알림. (${r.category || ''} ${pl.eventType === 'INSERT' ? '추가' : '수정'})`,
-        `${dot(r.pray_date || '')} (${wday(r.pray_date)})`, [r.worker1, r.worker2].filter(Boolean).join(', '));
+      notify(`교회 기도 알림. (${r.category || ''} ${pl.eventType === 'INSERT' ? '추가' : '수정'})`, `${dot(r.pray_date || '')} (${wday(r.pray_date)})`, prNames(r));
     })
     .subscribe();
 }
-setInterval(() => { renderSch(); renderDuty(); renderPray(); }, 60000); // 24시간 경과 시 NEW/하이라이트 자동 해제
 
-/* ---------- 탭 ---------- */
-$('mainTabs').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  document.querySelectorAll('#mainTabs button').forEach(x => x.classList.toggle('on', x === b));
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === b.dataset.p));
-  if (b.dataset.p === 'pDuty') loadDuty();
-  if (b.dataset.p === 'pPray') loadPray();
-});
-let tab = 'todo';
-$('subTabs').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  tab = b.dataset.s;
-  document.querySelectorAll('#subTabs button').forEach(x => x.classList.toggle('on', x === b));
-  $('bDone').textContent = tab === 'done' ? '완료 해제' : '완료';
-  $('bDone').className = 'btn ' + (tab === 'done' ? 'orange' : 'green');
-  resetSch(); loadSch();
-});
+/* =====================  이벤트  ===================== */
+let downOnOverlay = false;
+document.addEventListener('mousedown', e => { downOnOverlay = !!e.target.matches?.('[data-overlay]'); });
 
-/* =================== 스케줄 관리 =================== */
-let cats = [], sch = [], selId = null;
+document.addEventListener('click', async e => {
+  const t = e.target, c = s => t.closest(s);
+  let x;
+  if (!c('.menu-wrap')) $('#menu').hidden = true;
 
-async function loadCats() {
-  cats = await run(sb.from('categories').select('*').order('sort_order').order('id'));
-  const cur = $('sCat').value;
-  $('sCat').innerHTML = '<option value="">항목 선택</option>' +
-    cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  $('sCat').value = cur;
-}
-async function loadSch() {
-  if (!sb) { renderSch(); return; }
-  await loadCats();
-  sch = await run(sb.from('schedules').select('*').eq('done', tab === 'done'));
-  renderSch();
-}
-function renderSch() {
-  const order = {}; cats.forEach((c, i) => order[c.id] = i);
-  const rank = r => r.category_id in order ? order[r.category_id] : 9999;
-  const dir = tab === 'done' ? -1 : 1;
-  const dd = r => r.due_date || (dir === 1 ? '9999-12-31' : '0000-00-00'); // 마감일 없는 옛 데이터는 맨 뒤
-  const rows = [...sch].sort((a, b) =>
-    dir * dd(a).localeCompare(dd(b)) || rank(a) - rank(b) || a.id - b.id);
-  const nm = id => (cats.find(c => c.id === id) || {}).name || '';
-  const t = today();
-  $('sBody').innerHTML = rows.length ? rows.map(r => `
-    <tr data-id="${r.id}" class="${r.id === selId ? 'sel' : ''} ${tab === 'todo' && r.due_date && r.due_date < t ? 'late' : ''}">
-      <td class="c due ${hl(r,'due_date')}">${dot(r.due_date)}</td>
-      <td class="c ${hl(r,'category_id')}">${esc(nm(r.category_id))}</td>
-      <td class="ct ${hl(r,'title') || hl(r,'content')}">${isNew(r) ? '<span class="nw">NEW</span>' : ''}${esc(r.title)}</td>
-    </tr>`).join('') : '<tr><td colspan="3" class="empty">등록된 내용이 없습니다</td></tr>';
-}
-$('sBody').addEventListener('click', e => {
-  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
-  const r = sch.find(x => x.id == tr.dataset.id); if (!r) return;
-  selId = r.id;
-  $('sDate').value = r.input_date;
-  $('sCat').value = r.category_id ?? '';
-  $('sTitle').value = r.title;
-  $('sContent').value = r.content ?? '';
-  $('sDue').value = r.due_date || today();
-  renderSch();
-});
-function resetSch() {
-  selId = null;
-  $('sDate').value = today();
-  $('sCat').value = '';
-  $('sTitle').value = ''; $('sContent').value = '';
-  $('sDue').value = today();
-  renderSch();
-}
-// 입력일자(input_date)는 기록용: 추가 때만 오늘 날짜로 저장하고, 수정 때는 건드리지 않음
-function schPayload() {
-  const title = $('sTitle').value.trim();
-  if (!title) { toast('제목을 입력하세요'); return null; }
-  if (!$('sDue').value) { toast('마감일을 선택하세요'); return null; }
-  return {
-    category_id: $('sCat').value ? Number($('sCat').value) : null,
-    title, content: $('sContent').value,
-    due_date: $('sDue').value
-  };
-}
-function needSel() { if (!selId) { toast('표에서 행을 먼저 선택하세요'); return false; } return true; }
+  if (t.matches('[data-overlay]')){ if (downOnOverlay) closeModal(Number(t.dataset.overlay)); return; }
+  if ((x = c('[data-close]'))){ closeModal(Number(x.dataset.close)); return; }
 
-$('bAdd').onclick = async () => {
-  const p = schPayload(); if (!p) return;
-  p.updated_by = CID;
-  p.input_date = today();
-  if (tab === 'done') { p.done = true; p.done_at = new Date().toISOString(); }
-  await run(sb.from('schedules').insert(p));
-  toast('추가되었습니다'); resetSch(); loadSch();
-};
-$('bEdit').onclick = async () => {
-  if (!needSel()) return;
-  const p = schPayload(); if (!p) return;
-  const meta = editMeta(sch.find(x => x.id === selId), p);
-  if (!meta) return toast('변경된 내용이 없습니다');
-  await run(sb.from('schedules').update({ ...p, ...meta }).eq('id', selId));
-  toast('수정되었습니다'); resetSch(); loadSch();
-};
-$('bDel').onclick = async () => {
-  if (!needSel()) return;
-  if (!confirm('선택한 내용을 삭제할까요?')) return;
-  await run(sb.from('schedules').delete().eq('id', selId));
-  toast('삭제되었습니다'); resetSch(); loadSch();
-};
-$('bDone').onclick = async () => {
-  if (!needSel()) return;
-  const toDone = tab === 'todo';
-  await run(sb.from('schedules').update({ done: toDone, done_at: toDone ? new Date().toISOString() : null, updated_by: CID }).eq('id', selId));
-  toast(toDone ? '완료 처리되었습니다' : '완료가 해제되었습니다'); resetSch(); loadSch();
-};
-$('bReset').onclick = resetSch;
-
-/* ---------- 항목 관리 모달 ---------- */
-let work = [], catSel = null;
-function renderCatModal() {
-  $('catList').innerHTML = work.length ? work.map((c, i) => `
-    <div class="item ${i === catSel ? 'sel' : ''}" data-i="${i}">
-      <b style="color:#999;width:22px">${i + 1}</b><span>${esc(c.name)}</span>
-    </div>`).join('') : '<div class="empty">등록된 항목이 없습니다</div>';
-}
-$('btnCat').onclick = () => {
-  if (!sb) return toast('Supabase 설정이 필요합니다');
-  work = cats.map(c => ({ id: c.id, name: c.name })); catSel = null;
-  renderCatModal(); $('catModal').classList.add('on');
-};
-$('catClose').onclick = () => $('catModal').classList.remove('on');
-$('catList').addEventListener('click', e => {
-  const it = e.target.closest('.item'); if (!it) return;
-  catSel = Number(it.dataset.i); renderCatModal();
-});
-$('catAdd').onclick = () => {
-  const n = $('newCat').value.trim(); if (!n) return;
-  if (work.some(c => c.name === n)) return toast('이미 있는 항목입니다');
-  work.push({ id: null, name: n }); $('newCat').value = '';
-  catSel = work.length - 1; renderCatModal();
-};
-function moveCat(d) {
-  if (catSel === null) return toast('항목을 선택하세요');
-  const j = catSel + d; if (j < 0 || j >= work.length) return;
-  [work[catSel], work[j]] = [work[j], work[catSel]]; catSel = j; renderCatModal();
-}
-$('catUp').onclick = () => moveCat(-1);
-$('catDown').onclick = () => moveCat(1);
-$('catDel').onclick = () => {
-  if (catSel === null) return toast('항목을 선택하세요');
-  if (!confirm('이 항목을 삭제할까요? (해당 항목의 스케줄은 항목이 비워집니다)')) return;
-  work.splice(catSel, 1); catSel = null; renderCatModal();
-};
-$('catSave').onclick = async () => {
-  try {
-    const keep = work.filter(c => c.id).map(c => c.id);
-    const del = cats.filter(c => !keep.includes(c.id)).map(c => c.id);
-    if (del.length) await run(sb.from('categories').delete().in('id', del));
-    for (let i = 0; i < work.length; i++) {
-      const c = work[i];
-      if (c.id) await run(sb.from('categories').update({ sort_order: i }).eq('id', c.id));
-      else await run(sb.from('categories').insert({ name: c.name, sort_order: i }));
-    }
-    toast('저장되었습니다');
-    $('catModal').classList.remove('on');
-    loadSch();
-  } catch (e) { /* run()에서 토스트 표시 */ }
-};
-
-/* =================== 기도 담당자 =================== */
-const wday = s => { if (!s) return ''; const [y, m, d] = s.split('-').map(Number); return '일월화수목금토'[new Date(y, m - 1, d).getDay()]; };
-const addDays = (n, base) => { const d = base ? new Date(base) : new Date(); d.setDate(d.getDate() + n); return d; };
-let prWorkers = [], prRows = [], prSel = null;
-const prCat = () => document.querySelector('input[name=prCat]:checked').value;
-const prNames = r => [r.worker1, r.worker2].filter(Boolean).join(', ');
-const prVisible = () => prRows.filter(r => r.category === prCat() && r.pray_date >= today())
-  .sort((a, b) => a.pray_date.localeCompare(b.pray_date) || a.id - b.id);
-
-async function loadPray() {
-  if (!sb) { renderPray(); return; }
-  prWorkers = await run(sb.from('prayer_workers').select('*').order('sort_order').order('id'));
-  prRows = await run(sb.from('prayer_schedule').select('*').gte('pray_date', ymd(addDays(-14))).order('pray_date').order('id'));
-  renderPrWorkers(); renderPray();
-}
-function renderPrWorkers() {
-  const cur = $('prStartWorker').value;
-  $('prStartWorker').innerHTML = '<option value="">이어서 (직전 일정 다음)</option>' +
-    prWorkers.map((w, i) => `<option value="${w.id}">${i + 1}. ${esc(w.name)}부터</option>`).join('');
-  $('prStartWorker').value = cur;
-  $('prList').innerHTML = prWorkers.map(w => `<option value="${esc(w.name)}">`).join('');
-  $('prChips').innerHTML = prWorkers.length ? prWorkers.map((w, i) =>
-    `<span class="chip" data-n="${esc(w.name)}"><span class="t">${i + 1}. ${esc(w.name)}</span><b data-del="${w.id}">×</b></span>`).join('')
-    : '<span class="note" style="grid-column:1/-1">등록된 담당자가 없습니다. 이름 입력 후 [+담당자]</span>';
-}
-function renderPray() {
-  const rows = prVisible();
-  $('prBody').innerHTML = rows.length ? rows.map(r => `
-    <tr data-id="${r.id}" class="${r.id === prSel ? 'sel' : ''}">
-      <td class="w ${hl(r,'pray_date')}">${isNew(r) ? '<span class="nw">NEW</span>' : ''}${dot(r.pray_date)}</td>
-      <td class="w ${hl(r,'pray_date')}">${wday(r.pray_date)}</td>
-      <td class="w ${hl(r,'worker1') || hl(r,'worker2')}">${esc(prNames(r))}</td>
-    </tr>`).join('') : '<tr><td colspan="3" class="empty">오늘 이후 등록된 일정이 없습니다</td></tr>';
-}
-document.querySelectorAll('input[name=prCat]').forEach(r => r.addEventListener('change', () => { prSel = null; renderPray(); }));
-$('prChips').addEventListener('click', async e => {
-  const del = e.target.closest('[data-del]');
-  if (del) {
-    if (!confirm('이 담당자를 명단에서 삭제할까요? (등록된 일정은 유지됩니다)')) return;
-    await run(sb.from('prayer_workers').delete().eq('id', del.dataset.del));
-    toast('삭제되었습니다'); loadPray(); return;
+  // 표 / 카드 조작
+  if ((x = c('[data-toggle]'))){ e.stopPropagation(); await toggleDone(+x.dataset.toggle); return; }
+  if ((x = c('[data-toggle-d]'))){ const id = +x.dataset.toggleD; if (await toggleDone(id)){ closeModal('all'); } return; }
+  if ((x = c('[data-del]'))){ await doDelete(x.dataset.kind, +x.dataset.del); return; }
+  if ((x = c('[data-edit]'))){
+    const id = +x.dataset.edit, k = x.dataset.kind;
+    if (k === 'sch') openSchForm(state.sch.find(r => r.id === id));
+    else if (k === 'duty') openDutyForm(state.duties.find(r => r.id === id));
+    else openPrayForm(state.prRows.find(r => r.id === id));
+    return;
   }
-  const chip = e.target.closest('.chip'); if (!chip) return;
-  if (!$('prW1').value.trim()) $('prW1').value = chip.dataset.n;
-  else $('prW2').value = chip.dataset.n;
-});
-$('prAddWorker').onclick = async () => {
-  const n = $('prNew').value.trim(); if (!n) return toast('담당자 이름을 입력하세요');
-  if (prWorkers.some(w => w.name === n)) return toast('이미 등록된 담당자입니다');
-  await run(sb.from('prayer_workers').insert({ name: n, sort_order: prWorkers.length }));
-  $('prNew').value = ''; toast('담당자가 등록되었습니다'); loadPray();
-};
-$('prBody').addEventListener('click', e => {
-  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
-  const r = prRows.find(x => x.id == tr.dataset.id); if (!r) return;
-  prSel = r.id;
-  $('prDate').value = r.pray_date; $('prW1').value = r.worker1 || ''; $('prW2').value = r.worker2 || '';
-  renderPray();
-});
-function prPayload() {
-  let w1 = $('prW1').value.trim(), w2 = $('prW2').value.trim();
-  if (!w1 && w2) { w1 = w2; w2 = ''; }
-  const p = { pray_date: $('prDate').value, category: prCat(), worker1: w1, worker2: w2 };
-  if (!p.pray_date) { toast('날짜를 선택하세요'); return null; }
-  if (!w1) { toast('담당자를 입력하세요'); return null; }
-  if (w1 === w2) { toast('담당자1과 2가 같습니다'); return null; }
-  return p;
-}
-function needPrSel() { if (!prSel) { toast('표에서 행을 먼저 선택하세요'); return false; } return true; }
-$('prAdd').onclick = async () => {
-  const p = prPayload(); if (!p) return;
-  if (prRows.some(r => r.pray_date === p.pray_date && r.category === p.category))
-    return toast('이미 등록된 날짜입니다. 표에서 선택 후 수정하세요');
-  p.updated_by = CID;
-  await run(sb.from('prayer_schedule').insert(p));
-  toast('추가되었습니다'); prSel = null; loadPray();
-};
-$('prEdit').onclick = async () => {
-  if (!needPrSel()) return;
-  const p = prPayload(); if (!p) return;
-  if (prRows.some(r => r.id !== prSel && r.pray_date === p.pray_date && r.category === p.category))
-    return toast('그 날짜에 이미 다른 일정이 있습니다');
-  const meta = editMeta(prRows.find(x => x.id === prSel), p);
-  if (!meta) return toast('변경된 내용이 없습니다');
-  await run(sb.from('prayer_schedule').update({ ...p, ...meta }).eq('id', prSel));
-  toast('수정되었습니다'); loadPray();
-};
-$('prDel').onclick = async () => {
-  if (!needPrSel()) return;
-  if (!confirm('선택한 일정을 삭제할까요?')) return;
-  await run(sb.from('prayer_schedule').delete().eq('id', prSel));
-  toast('삭제되었습니다'); prSel = null; loadPray();
-};
-async function movePray(d) {
-  if (!needPrSel()) return;
-  const list = prVisible();
-  const i = list.findIndex(x => x.id === prSel), j = i + d;
-  if (j < 0 || j >= list.length) return toast(d < 0 ? '맨 위입니다' : '맨 아래입니다');
-  const a = list[i], b = list[j];
-  const pa = { worker1: b.worker1, worker2: b.worker2 }, pb = { worker1: a.worker1, worker2: a.worker2 };
-  await Promise.all([
-    run(sb.from('prayer_schedule').update({ ...pa, ...editMeta(a, pa) }).eq('id', a.id)),
-    run(sb.from('prayer_schedule').update({ ...pb, ...editMeta(b, pb) }).eq('id', b.id))
-  ]);
-  prSel = b.id; await loadPray(); toast('담당자를 교환했습니다');
-}
-$('prUp').onclick = () => movePray(-1);
-$('prDown').onclick = () => movePray(1);
+  if ((x = c('[data-move]'))){ await moveRow(x.dataset.kind, +x.dataset.id, +x.dataset.move); return; }
+  if ((x = c('[data-rotate]'))){ await rotateFrom(x.dataset.kind, +x.dataset.id); return; }
+  if ((x = c('[data-open]'))){ openDetail(x.dataset.kind, +x.dataset.open); return; }
 
-/* 지난 2주 팝업 */
-$('prPast').onclick = () => {
-  const from = ymd(addDays(-14)), t = today(), c = prCat();
-  const rows = prRows.filter(r => r.category === c && r.pray_date >= from && r.pray_date < t)
-    .sort((a, b) => b.pray_date.localeCompare(a.pray_date));
-  $('prPastTitle').textContent = `${c} 지난 2주 (${dot(from)} ~)`;
-  $('prPastBody').innerHTML = rows.length ? rows.map(r => `
-    <tr><td class="w">${dot(r.pray_date)}</td><td class="w">${wday(r.pray_date)}</td><td class="w">${esc(prNames(r))}</td></tr>`).join('')
-    : '<tr><td colspan="3" class="empty">지난 2주간 기록이 없습니다</td></tr>';
-  $('prPastModal').classList.add('on');
-};
-$('prPastClose').onclick = () => $('prPastModal').classList.remove('on');
-
-/* 기본 순서 설정 */
-let prWWork = [], prWSel = null;
-function renderPrWModal() {
-  $('prWOrderList').innerHTML = prWWork.length ? prWWork.map((w, i) => `
-    <div class="item ${i === prWSel ? 'sel' : ''}" data-i="${i}">
-      <b style="color:#999;width:22px">${i + 1}</b><span>${esc(w.name)}</span>
-    </div>`).join('') : '<div class="empty">등록된 담당자가 없습니다</div>';
-}
-$('prOrder').onclick = () => {
-  if (!sb) return toast('Supabase 설정이 필요합니다');
-  if (!prWorkers.length) return toast('먼저 담당자를 등록하세요');
-  prWWork = prWorkers.map(w => ({ id: w.id, name: w.name })); prWSel = null;
-  renderPrWModal(); $('prWModal').classList.add('on');
-};
-$('prWClose').onclick = () => $('prWModal').classList.remove('on');
-$('prWOrderList').addEventListener('click', e => {
-  const it = e.target.closest('.item'); if (!it) return;
-  prWSel = Number(it.dataset.i); renderPrWModal();
-});
-function movePrW(d) {
-  if (prWSel === null) return toast('담당자를 선택하세요');
-  const j = prWSel + d; if (j < 0 || j >= prWWork.length) return;
-  [prWWork[prWSel], prWWork[j]] = [prWWork[j], prWWork[prWSel]]; prWSel = j; renderPrWModal();
-}
-$('prWUp').onclick = () => movePrW(-1);
-$('prWDown').onclick = () => movePrW(1);
-$('prWSave').onclick = async () => {
-  try {
-    await Promise.all(prWWork.map((w, i) => run(sb.from('prayer_workers').update({ sort_order: i }).eq('id', w.id))));
-    toast('기본 순서가 저장되었습니다'); $('prWModal').classList.remove('on'); loadPray();
-  } catch (e) {}
-};
-
-/* 기간 자동생성: 매일 2명씩 순환 */
-$('prGen').onclick = async () => {
-  if (prWorkers.length < 1) return toast('먼저 담당자를 등록하세요');
-  const from = $('prFrom').value, to = $('prTo').value;
-  if (!from || !to || from > to) return toast('기간을 올바르게 선택하세요');
-  const c = prCat(), n = prWorkers.length;
-  const pick = $('prStartWorker').value;
-  let idx;
-  if (pick !== '') idx = prWorkers.findIndex(w => String(w.id) === pick);
-  else {
-    const prev = prRows.filter(r => r.category === c && r.pray_date < from).pop();
-    const last = prev ? (prev.worker2 || prev.worker1) : null;
-    idx = last ? prWorkers.findIndex(w => w.name === last) + 1 : 0;
+  // 새로 만들기
+  if (c('[data-new]')){
+    if (!isMaster()) return;
+    if (state.tab === 'sch') openSchForm(); else if (state.tab === 'duty') openDutyForm(); else openPrayForm();
+    return;
   }
-  if (idx < 0) idx = 0;
-  const exist = new Set(prRows.filter(r => r.category === c).map(r => r.pray_date));
-  const rows = [];
-  for (let d = new Date(from + 'T00:00:00'); ymd(d) <= to; d.setDate(d.getDate() + 1)) {
-    const s = ymd(d); if (exist.has(s)) continue;
-    const w1 = prWorkers[idx % n].name; idx++;
-    let w2 = ''; if (n > 1) { w2 = prWorkers[idx % n].name; idx++; }
-    rows.push({ pray_date: s, category: c, worker1: w1, worker2: w2, updated_by: CID });
+
+  // 폼 안의 보조 버튼
+  if (c('[data-reset-form]')){
+    $('#f-due').value = today(); $('#f-cat').value = ''; $('#f-title').value = ''; $('#f-content').value = ''; $('#ferr').textContent = ''; $('#f-title').focus();
+    return;
   }
-  if (!rows.length) return toast('생성할 날짜가 없습니다');
-  if (!confirm(`${c} ${rows.length}일치를 생성할까요?`)) return;
-  await run(sb.from('prayer_schedule').insert(rows));
-  toast(`${rows.length}건 생성되었습니다`); loadPray();
-};
-$('prRotate').onclick = async () => {
-  if (!needPrSel()) return;
-  if (!prWorkers.length) return toast('먼저 담당자를 등록하세요');
-  const list = prVisible(), i = list.findIndex(x => x.id === prSel), n = prWorkers.length;
-  let idx = prWorkers.findIndex(w => w.name === list[i].worker1); if (idx < 0) idx = 0;
-  const targets = list.slice(i);
-  if (!confirm(`선택한 행부터 ${targets.length}건을 기본 순서대로 다시 배정할까요?`)) return;
-  await Promise.all(targets.map(r => {
-    const w1 = prWorkers[idx % n].name; idx++;
-    let w2 = ''; if (n > 1) { w2 = prWorkers[idx % n].name; idx++; }
-    if (w1 === r.worker1 && w2 === (r.worker2 || '')) return null;
-    const p = { worker1: w1, worker2: w2 };
-    return run(sb.from('prayer_schedule').update({ ...p, ...editMeta(r, p) }).eq('id', r.id));
-  }));
-  toast('재배정되었습니다'); loadPray();
-};
-
-/* =================== 당직 관리 =================== */
-let workers = [], duties = [], dSel = null, presets = [], presetInit = false;
-
-async function loadDuty() {
-  if (!sb) { renderDuty(); return; }
-  workers = await run(sb.from('duty_workers').select('*').order('sort_order').order('id'));
-  duties = await run(sb.from('duty_schedule').select('*').order('duty_date').order('id'));
-  await loadPresets();
-  renderWorkers(); renderDuty();
-}
-
-/* ---------- 근무시간 프리셋 ---------- */
-const pLabel = p => `${p.is_default ? '★ ' : ''}${p.name} (${fmtT(p.start_time)}~${fmtT(p.end_time)})`;
-async function loadPresets() {
-  try {
-    presets = await run(sb.from('duty_presets').select('*').order('id'));
-  } catch (e) { presets = []; return; }   // 테이블이 아직 없으면 토스트로 안내됨
-  const cur = $('pSel').value;
-  $('pSel').innerHTML = '<option value="">프리셋 선택</option>' +
-    presets.map(p => `<option value="${p.id}">${esc(pLabel(p))}</option>`).join('');
-  $('pSel').value = cur;
-  // 앱을 처음 열 때 한 번만 기본 프리셋을 시간 칸에 적용
-  if (!presetInit) {
-    presetInit = true;
-    const d = presets.find(p => p.is_default);
-    if (d) { $('dStart').value = d.start_time; $('dEnd').value = d.end_time; $('pSel').value = d.id; }
+  if ((x = c('[data-pick]'))){ $('#f-name').value = x.dataset.pick; return; }
+  if ((x = c('[data-pickw]'))){
+    const n = x.dataset.pickw, a = $('#f-w1'), b = $('#f-w2');
+    if (!a.value.trim()) a.value = n; else b.value = n;
+    return;
   }
-}
-$('pSel').addEventListener('change', () => {
-  const p = presets.find(x => String(x.id) === $('pSel').value);
-  if (p) { $('dStart').value = p.start_time; $('dEnd').value = p.end_time; }
-});
-$('pSave').onclick = async () => {
-  const s = $('dStart').value, e = $('dEnd').value;
-  if (!s || !e) return toast('근무시간을 입력하세요');
-  const name = (prompt('프리셋 이름을 입력하세요 (예: 평일, 공휴일)', '') || '').trim();
-  if (!name) return;
-  if (presets.some(p => p.name === name)) {
-    if (!confirm(`'${name}' 프리셋이 있습니다. 현재 시간으로 덮어쓸까요?`)) return;
-    await run(sb.from('duty_presets').update({ start_time: s, end_time: e }).eq('name', name));
-  } else {
-    await run(sb.from('duty_presets').insert({ name, start_time: s, end_time: e, is_default: presets.length === 0 }));
-  }
-  toast('프리셋이 저장되었습니다'); await loadPresets();
-  const p = presets.find(x => x.name === name); if (p) $('pSel').value = p.id;
-};
-$('pDefault').onclick = async () => {
-  const id = $('pSel').value; if (!id) return toast('프리셋을 선택하세요');
-  await run(sb.from('duty_presets').update({ is_default: false }).neq('id', id));
-  await run(sb.from('duty_presets').update({ is_default: true }).eq('id', id));
-  toast('기본 프리셋으로 설정되었습니다'); loadPresets();
-};
-$('pDel').onclick = async () => {
-  const id = $('pSel').value; if (!id) return toast('프리셋을 선택하세요');
-  if (!confirm('이 프리셋을 삭제할까요?')) return;
-  await run(sb.from('duty_presets').delete().eq('id', id));
-  $('pSel').value = ''; toast('삭제되었습니다'); loadPresets();
-};
-function renderWorkers() {
-  const cur = $('dStartWorker').value;
-  $('dStartWorker').innerHTML = '<option value="">이어서 (직전 당직 다음)</option>' +
-    workers.map((w, i) => `<option value="${w.id}">${i + 1}. ${esc(w.name)}부터</option>`).join('');
-  $('dStartWorker').value = cur;
-  $('wList').innerHTML = workers.map(w => `<option value="${esc(w.name)}">`).join('');
-  $('chips').innerHTML = workers.length ? workers.map((w, i) =>
-    `<span class="chip" data-n="${esc(w.name)}"><span class="t">${i + 1}. ${esc(w.name)}</span><b data-del="${w.id}">×</b></span>`).join('')
-    : '<span class="note" style="grid-column:1/-1">등록된 당직자가 없습니다. 이름 입력 후 [+당직자]</span>';
-}
-function renderDuty() {
-  $('dBody').innerHTML = duties.length ? duties.map(r => `
-    <tr data-id="${r.id}" class="${r.id === dSel ? 'sel' : ''}">
-      <td class="w ${hl(r,'duty_date')}">${isNew(r) ? '<span class="nw">NEW</span>' : ''}${dot(r.duty_date)}</td>
-      <td class="w ${hl(r,'start_time') || hl(r,'end_time')}">${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}</td>
-      <td class="w ${hl(r,'worker_name')}">${esc(r.worker_name)}</td>
-    </tr>`).join('') : '<tr><td colspan="3" class="empty">등록된 당직이 없습니다</td></tr>';
-}
-$('chips').addEventListener('click', async e => {
-  const del = e.target.closest('[data-del]');
-  if (del) {
-    if (!confirm('이 당직자를 명단에서 삭제할까요? (등록된 당직 일정은 유지됩니다)')) return;
-    await run(sb.from('duty_workers').delete().eq('id', del.dataset.del));
-    toast('삭제되었습니다'); loadDuty(); return;
-  }
-  const chip = e.target.closest('.chip'); if (chip) $('dName').value = chip.dataset.n;
-});
-$('bAddWorker').onclick = async () => {
-  const n = $('dName').value.trim(); if (!n) return toast('당직자 이름을 입력하세요');
-  if (workers.some(w => w.name === n)) return toast('이미 등록된 당직자입니다');
-  await run(sb.from('duty_workers').insert({ name: n, sort_order: workers.length }));
-  toast('당직자가 등록되었습니다'); loadDuty();
-};
-$('dBody').addEventListener('click', e => {
-  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
-  const r = duties.find(x => x.id == tr.dataset.id); if (!r) return;
-  dSel = r.id;
-  $('dDate').value = r.duty_date; $('dStart').value = r.start_time;
-  $('dEnd').value = r.end_time; $('dName').value = r.worker_name;
-  renderDuty();
-});
-function dutyPayload() {
-  const p = { duty_date: $('dDate').value, start_time: $('dStart').value, end_time: $('dEnd').value, worker_name: $('dName').value.trim() };
-  if (!p.duty_date) { toast('당직일자를 선택하세요'); return null; }
-  if (!p.start_time || !p.end_time) { toast('근무시간을 입력하세요'); return null; }
-  if (!p.worker_name) { toast('당직자를 입력하세요'); return null; }
-  return p;
-}
-function needDSel() { if (!dSel) { toast('표에서 행을 먼저 선택하세요'); return false; } return true; }
+  if ((x = c('[data-preset]'))){ try { await presetAction(x.dataset.preset); } catch {} return; }
 
-$('dAdd').onclick = async () => {
-  const p = dutyPayload(); if (!p) return;
-  p.updated_by = CID;
-  await run(sb.from('duty_schedule').insert(p));
-  toast('추가되었습니다'); dSel = null; loadDuty();
-};
-$('dEdit').onclick = async () => {
-  if (!needDSel()) return;
-  const p = dutyPayload(); if (!p) return;
-  const meta = editMeta(duties.find(x => x.id === dSel), p);
-  if (!meta) return toast('변경된 내용이 없습니다');
-  await run(sb.from('duty_schedule').update({ ...p, ...meta }).eq('id', dSel));
-  toast('수정되었습니다'); loadDuty();
-};
-$('dDel').onclick = async () => {
-  if (!needDSel()) return;
-  if (!confirm('선택한 당직 일정을 삭제할까요?')) return;
-  await run(sb.from('duty_schedule').delete().eq('id', dSel));
-  toast('삭제되었습니다'); dSel = null; loadDuty();
-};
-async function moveDuty(d) {
-  if (!needDSel()) return;
-  const i = duties.findIndex(x => x.id === dSel), j = i + d;
-  if (j < 0 || j >= duties.length) return toast(d < 0 ? '맨 위입니다' : '맨 아래입니다');
-  const a = duties[i], b = duties[j];
-  await Promise.all([
-    run(sb.from('duty_schedule').update({ worker_name: b.worker_name, ...editMeta(a, { worker_name: b.worker_name }) }).eq('id', a.id)),
-    run(sb.from('duty_schedule').update({ worker_name: a.worker_name, ...editMeta(b, { worker_name: a.worker_name }) }).eq('id', b.id))
-  ]);
-  // 선택은 '위치' 기준으로 따라가도록 이동한 행 id 유지 (날짜 고정, 당직자만 교환)
-  dSel = b.id;
-  await loadDuty();
-  toast('당직자를 교환했습니다');
-}
-$('dUp').onclick = () => moveDuty(-1);
-$('dDown').onclick = () => moveDuty(1);
+  // 명단 관리 모달 내부
+  if (c('#rosAdd')){ rosterAdd(); return; }
+  if (c('#rosUp')){ rosterMove(-1); return; }
+  if (c('#rosDown')){ rosterMove(1); return; }
+  if (c('#rosDel')){ rosterDel(); return; }
+  if (c('#rosSave')){ await rosterSave(); return; }
+  if ((x = c('[data-ri]'))){ ros.sel = Number(x.dataset.ri); renderRoster(); return; }
 
-/* 당직자 기본 순서 설정 */
-let wWork = [], wSel = null;
-function renderWModal() {
-  $('wOrderList').innerHTML = wWork.length ? wWork.map((w, i) => `
-    <div class="item ${i === wSel ? 'sel' : ''}" data-i="${i}">
-      <b style="color:#999;width:22px">${i + 1}</b><span>${esc(w.name)}</span>
-    </div>`).join('') : '<div class="empty">등록된 당직자가 없습니다</div>';
-}
-$('wOrder').onclick = () => {
-  if (!sb) return toast('Supabase 설정이 필요합니다');
-  if (!workers.length) return toast('먼저 당직자를 등록하세요');
-  wWork = workers.map(w => ({ id: w.id, name: w.name })); wSel = null;
-  renderWModal(); $('wModal').classList.add('on');
-};
-$('wClose').onclick = () => $('wModal').classList.remove('on');
-$('wOrderList').addEventListener('click', e => {
-  const it = e.target.closest('.item'); if (!it) return;
-  wSel = Number(it.dataset.i); renderWModal();
-});
-function moveW(d) {
-  if (wSel === null) return toast('당직자를 선택하세요');
-  const j = wSel + d; if (j < 0 || j >= wWork.length) return;
-  [wWork[wSel], wWork[j]] = [wWork[j], wWork[wSel]]; wSel = j; renderWModal();
-}
-$('wUp').onclick = () => moveW(-1);
-$('wDown').onclick = () => moveW(1);
-$('wSave').onclick = async () => {
-  try {
-    await Promise.all(wWork.map((w, i) => run(sb.from('duty_workers').update({ sort_order: i }).eq('id', w.id))));
-    toast('기본 순서가 저장되었습니다');
-    $('wModal').classList.remove('on');
-    loadDuty();
-  } catch (e) { /* run()에서 토스트 표시 */ }
-};
-
-/* 월요일 자동생성 */
-$('dGen').onclick = async () => {
-  if (!workers.length) return toast('먼저 당직자를 등록하세요');
-  const weeks = Number($('dWeeks').value);
-  if (!Number.isInteger(weeks) || weeks < 1 || weeks > 12) return toast('주 수는 1~12 사이로 입력하세요');
-  // 기준: 표의 마지막 날짜(없으면 오늘). 그 날짜보다 뒤에 오는 첫 월요일부터 시작
-  const prev = duties.length ? duties[duties.length - 1] : null;      // duties 는 날짜순 정렬
-  const baseStr = prev ? prev.duty_date : today();
-  const [by, bm, bd] = baseStr.split('-').map(Number);
-  const start = new Date(by, bm - 1, bd);
-  start.setDate(start.getDate() + (((8 - start.getDay()) % 7) || 7));  // 다음 월요일 (기준일이 월요일이면 +7)
-  const pick = $('dStartWorker').value;
-  let idx;
-  if (pick !== '') idx = workers.findIndex(w => String(w.id) === pick);
-  else idx = prev ? workers.findIndex(w => w.name === prev.worker_name) + 1 : 0;
-  if (idx < 0) idx = 0;
-  const exist = new Set(duties.map(r => r.duty_date));
-  const rows = [];
-  for (let w = 0; w < weeks; w++) {
-    const dt = new Date(start); dt.setDate(dt.getDate() + 7 * w);
-    const s = ymd(dt);
-    if (exist.has(s)) continue;
-    rows.push({ duty_date: s, start_time: $('dStart').value || '09:00', end_time: $('dEnd').value || '17:00',
-      worker_name: workers[idx % workers.length].name, updated_by: CID });
-    idx++;
-  }
-  if (!rows.length) return toast('생성할 월요일이 없습니다');
-  if (!confirm(`${dot(rows[0].duty_date)} ~ ${dot(rows[rows.length - 1].duty_date)} 월요일 ${rows.length}건을 생성할까요?`)) return;
-  await run(sb.from('duty_schedule').insert(rows));
-  toast(`${rows.length}건 생성되었습니다`); loadDuty();
-};
-
-/* 선택 행부터 이후 순환 재배정 */
-$('dRotate').onclick = async () => {
-  if (!needDSel()) return;
-  if (!workers.length) return toast('먼저 당직자를 등록하세요');
-  const i = duties.findIndex(x => x.id === dSel);
-  let idx = workers.findIndex(w => w.name === duties[i].worker_name);
-  if (idx < 0) idx = 0;
-  const targets = duties.slice(i);
-  if (!confirm(`선택한 행부터 ${targets.length}건의 당직자를 등록 순서대로 다시 배정할까요?`)) return;
-  await Promise.all(targets.map((r, k) => {
-    const nn = workers[(idx + k) % workers.length].name;
-    if (nn === r.worker_name) return null;
-    return run(sb.from('duty_schedule').update({ worker_name: nn, ...editMeta(r, { worker_name: nn }) }).eq('id', r.id));
-  }));
-  toast('재배정되었습니다'); loadDuty();
-};
-
-/* =================== 로그인 / 회원가입 / 권한 =================== */
-let ME = null, appStarted = false, authMode = 'login';
-const isMaster = () => !!ME && ME.role_id === 1;
-async function rpc(fn, args) {
-  const { data, error } = await sb.rpc(fn, args);
-  if (error) throw error;
-  return data;
-}
-const authMsg = m => { $('aMsg').textContent = m || ''; };
-
-// 유저(2): 버튼(.mo)을 숨기고 입력칸은 읽기 전용 → 표 조회만 가능
-function applyRole() {
-  const ro = !!ME && !isMaster();
-  document.body.classList.toggle('role-user', ro);
-  document.querySelectorAll('#pSch input,#pSch select,#pSch textarea,#pDuty input,#pDuty select,#pPray input,#pPray select').forEach(el => {
-    if (el.type === 'radio') return;               // 새벽/저녁 구분 보기는 유저도 사용
-    if (ro) {
-      if (el.tagName === 'TEXTAREA' || el.type === 'text') { if (!el.readOnly) { el.readOnly = true; el.dataset.ro = '1'; } }
-      else if (!el.disabled) { el.disabled = true; el.dataset.rd = '1'; }
-    } else {
-      if (el.dataset.ro) { el.readOnly = false; delete el.dataset.ro; }
-      if (el.dataset.rd) { el.disabled = false; delete el.dataset.rd; }
-    }
-  });
-  $('meInfo').textContent = ME ? `👤 ${ME.login_id}${ME.position ? ' · ' + ME.position : ''} · ${ME.role_name}` : '';
-  $('btnMembers').style.display = isMaster() ? '' : 'none';
-}
-function enterApp() {
-  $('auth').classList.remove('on');
-  applyRole();
-  loadSch(); loadDuty();
-  if (!appStarted) { appStarted = true; startRealtime(); }
-}
-function setAuthMode(m) {
-  authMode = m;
-  $('auth').classList.toggle('signup', m === 'signup');
-  document.querySelectorAll('#authTabs button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
-  $('aSubmit').textContent = m === 'signup' ? '회원가입' : '로그인';
-  $('aPw').autocomplete = m === 'signup' ? 'new-password' : 'current-password';
-  authMsg('');
-}
-function showAuth(mode) {
-  setAuthMode(mode || 'login');
-  try { $('aId').value = localStorage.getItem('lastId') || ''; } catch (e) {}
-  $('aPw').value = ''; $('aPw2').value = '';
-  $('auth').classList.add('on');
-}
-$('authTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setAuthMode(b.dataset.m); });
-$('authForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  if (!sb) return authMsg('Supabase 설정이 필요합니다');
-  const id = $('aId').value.trim(), pw = $('aPw').value;
-  if (!id || !pw) return authMsg('아이디와 비밀번호를 입력하세요');
-  $('aSubmit').disabled = true; authMsg('');
-  try {
-    let res;
-    if (authMode === 'signup') {
-      if (pw !== $('aPw2').value) throw new Error('비밀번호 확인이 일치하지 않습니다');
-      res = await rpc('app_signup', { p_id: id, p_pw: pw, p_position: $('aPos').value.trim(), p_phone: $('aTel').value.trim() });
-    } else {
-      res = await rpc('app_login', { p_id: id, p_pw: pw });
-    }
-    TOKEN = res.token; store.set(res.token, $('aAuto').checked);
-    try { localStorage.setItem('lastId', id); } catch (e2) {}
-    ME = res; enterApp();
-    toast(authMode === 'signup' ? (res.role_id === 1 ? '가입 완료! 첫 가입자라 마스터 권한이 부여되었습니다' : '가입이 완료되었습니다') : `${res.login_id}님 환영합니다`);
-  } catch (err) {
-    authMsg(err.message || '처리하지 못했습니다');
-  } finally { $('aSubmit').disabled = false; }
-});
-$('btnLogout').onclick = async () => {
-  if (!confirm('로그아웃할까요?')) return;
-  try { await rpc('app_logout'); } catch (e) {}
-  store.clear(); location.reload();
-};
-
-// 앱을 열 때: 저장된 토큰으로 자동 로그인
-async function boot() {
-  if (!sb) return;
-  if (TOKEN) {
+  // 회원 관리 모달 내부
+  if ((x = c('[data-mem]'))){
+    const id = Number(x.closest('.mem').dataset.id);
     try {
-      ME = await rpc('app_me');
-      if (!ME) { TOKEN = null; store.clear(); }   // 만료/삭제된 토큰
-    } catch (e) { ME = null; showAuth('login'); authMsg('서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 새로고침하세요'); return; }
+      if (x.dataset.mem === 'pw'){
+        const pw = await askBox({ title: '비밀번호 초기화', message: '새 비밀번호를 입력해 주세요 (4자 이상).<br><span class="muted">해당 회원은 다시 로그인해야 합니다.</span>', input: { type: 'password', placeholder: '새 비밀번호' }, ok: '초기화' });
+        if (!pw) return;
+        await rpc('app_reset_password', { p_member_id: id, p_new_pw: pw }); toast('비밀번호를 초기화했어요');
+      } else {
+        if (!await askBox({ title: '회원 삭제', message: '이 회원을 삭제할까요?', ok: '삭제', danger: true })) return;
+        await rpc('app_delete_member', { p_member_id: id }); toast('삭제했어요');
+      }
+    } catch (err) { toast('오류: ' + err.message, 'bad'); }
+    loadMembers(); return;
   }
-  if (ME) enterApp(); else showAuth('login');
-}
-// 앱으로 돌아올 때마다 로그인/권한 상태 재확인 (만료·권한 변경 반영)
-document.addEventListener('visibilitychange', async () => {
-  if (document.hidden || !ME || !sb) return;
-  try {
-    const m = await rpc('app_me');
-    if (!m) { store.clear(); location.reload(); return; }
-    const changed = m.role_id !== ME.role_id;
-    ME = m; if (changed) applyRole();
-  } catch (e) {}
-});
 
-/* ---- 회원 관리 (마스터) ---- */
-async function loadMembers() {
-  let list;
-  try { list = await rpc('app_list_members'); } catch (e) { return toast('오류: ' + e.message); }
-  $('memList').innerHTML = list.map(m => `
-    <div class="mem" data-id="${m.id}">
-      <div class="l1">${esc(m.login_id)}${m.position ? ' (' + esc(m.position) + ')' : ''}${m.id === ME.id ? ' · 나' : ''}</div>
-      <div class="l2">${esc(m.phone || '전화번호 없음')}</div>
-      <div class="acts">
-        <select data-act="role">
-          <option value="1" ${m.role_id === 1 ? 'selected' : ''}>1 마스터</option>
-          <option value="2" ${m.role_id === 2 ? 'selected' : ''}>2 유저</option>
-        </select>
-        <button class="btn gray sm" data-act="pw">비번 초기화</button>
-        <button class="btn red sm" data-act="del">삭제</button>
-      </div>
-    </div>`).join('');
-}
-async function refreshMe() {
-  try { const m = await rpc('app_me'); if (m) { ME = m; applyRole(); if (!isMaster()) $('memModal').classList.remove('on'); } } catch (e) {}
-}
-$('btnMembers').onclick = async () => { await loadMembers(); $('memModal').classList.add('on'); };
-$('memClose').onclick = () => $('memModal').classList.remove('on');
-$('memList').addEventListener('change', async e => {
-  const s = e.target.closest('select[data-act=role]'); if (!s) return;
-  const id = Number(s.closest('.mem').dataset.id);
-  try { await rpc('app_set_role', { p_member_id: id, p_role_id: Number(s.value) }); toast('권한이 변경되었습니다'); }
-  catch (err) { toast('오류: ' + err.message); }
-  await loadMembers(); refreshMe();
-});
-$('memList').addEventListener('click', async e => {
-  const b = e.target.closest('button[data-act]'); if (!b) return;
-  const id = Number(b.closest('.mem').dataset.id);
-  try {
-    if (b.dataset.act === 'pw') {
-      const pw = prompt('새 비밀번호를 입력하세요 (4자 이상)\n※ 해당 회원은 다시 로그인해야 합니다'); if (!pw) return;
-      await rpc('app_reset_password', { p_member_id: id, p_new_pw: pw }); toast('비밀번호가 초기화되었습니다');
-    } else if (b.dataset.act === 'del') {
-      if (!confirm('이 회원을 삭제할까요?')) return;
-      await rpc('app_delete_member', { p_member_id: id }); toast('삭제되었습니다');
+  // 상단 / 필터
+  if ((x = c('[data-filter]'))){
+    const v = x.dataset.filter;
+    if (state.tab === 'sch') state.schFilter = v;
+    else if (state.tab === 'duty') state.dutyFilter = v;
+    else { state.prayCat = v; ls.set('prayCat', v); }
+    render(); return;
+  }
+  if ((x = c('[data-view]'))){
+    state.tab = x.dataset.view; ls.set('tab', state.tab);
+    state.q = ''; $('#q').value = ''; state.error = null; render(); LOADERS[state.tab](); return;
+  }
+  if (c('#btnMenu')){ const m = $('#menu'); m.hidden = !m.hidden; return; }
+  if ((x = c('[data-act]'))){
+    $('#menu').hidden = true;
+    switch (x.dataset.act){
+      case 'refresh': state.loading[state.tab] = true; state.error = null; render(); LOADERS[state.tab](); break;
+      case 'notify': askNotify(); break;
+      case 'members': openMembers(); break;
+      case 'logout': doLogout(); break;
+      case 'cats': if (isMaster()) openRoster('cat'); break;
+      case 'roster-duty': if (isMaster()) openRoster('duty'); break;
+      case 'roster-pray': if (isMaster()) openRoster('pray'); break;
+      case 'gen-duty': if (isMaster()) openGenDuty(); break;
+      case 'gen-pray': if (isMaster()) openGenPray(); break;
+      case 'past-pray': openPast(); break;
     }
-  } catch (err) { toast('오류: ' + err.message); }
-  loadMembers();
+  }
 });
 
-/* ---------- 초기화 ---------- */
-$('sDate').value = today();
-$('sDue').value = today();
-$('dDate').value = today();
-$('prDate').value = today(); $('prFrom').value = today(); $('prTo').value = ymd(addDays(13));
-renderSch(); renderDuty();
-boot();   // 저장된 로그인 토큰으로 자동 로그인 (없으면 로그인 화면)
+document.addEventListener('submit', e => {
+  const id = e.target.id;
+  if (id === 'fs'){ e.preventDefault(); submitSch(e.target); }
+  else if (id === 'fd'){ e.preventDefault(); submitDuty(e.target); }
+  else if (id === 'fp'){ e.preventDefault(); submitPray(e.target); }
+  else if (id === 'gd'){ e.preventDefault(); submitGenDuty(); }
+  else if (id === 'gp'){ e.preventDefault(); submitGenPray(e.target); }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'f-preset'){
+    const p = state.presets.find(x => String(x.id) === e.target.value);
+    if (p){ $('#f-start').value = p.start_time; $('#f-end').value = p.end_time; }
+  } else if (e.target.matches('[data-role]')){
+    const id = Number(e.target.closest('.mem').dataset.id);
+    rpc('app_set_role', { p_member_id: id, p_role_id: Number(e.target.value) })
+      .then(() => toast('권한을 변경했어요'), err => toast('오류: ' + err.message, 'bad'))
+      .then(async () => { await loadMembers(); await refreshMe(); if (!isMaster()) closeModal('all'); });
+  }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'rosNew') return;
+  if (e.target.id === 'q'){ state.q = e.target.value; render(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && modalOpen()){ closeModal($('#modalRoot2 .overlay') ? 2 : 1); return; }
+  if (e.key === 'Enter' && e.target.id === 'rosNew'){ e.preventDefault(); rosterAdd(); return; }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-open]') && !modalOpen()){
+    e.preventDefault(); openDetail(e.target.dataset.kind, +e.target.dataset.open);
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || !ME || $('#app').hidden) return;
+  refreshMe();
+  if (!modalOpen() && Date.now() - state.loadedAt > 30000) LOADERS[state.tab]();
+});
+setInterval(() => { if (!$('#app').hidden) render(); }, 60000);   // 24시간이 지나면 NEW / 하이라이트 자동 해제
+
+/* =====================  시작  ===================== */
+boot();
 
 /* ---------- PWA: 서비스워커 등록 (https 또는 localhost 에서만 동작) ---------- */
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
+})();
 </script>
 </body>
 </html>
