@@ -188,6 +188,16 @@ button.check:hover{border-color:var(--ok);color:var(--ok)}
 .mem .l2{color:var(--muted);font-size:13px;margin:2px 0 8px}
 .mem .acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .mem select{width:auto}
+.ctbl{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+.ctbl th{text-align:left;font-size:12px;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line)}
+.ctbl td{padding:11px 4px;border-bottom:1px solid var(--line);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctbl tr:last-child td{border-bottom:0}
+.ctbl .c1{width:22%} .ctbl .c2{width:22%} .ctbl .c3{width:56%}
+.ctbl td.nm{font-weight:650}
+.tel{color:var(--accent);font-weight:650;text-decoration:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tel:hover{text-decoration:underline}
+.cpy{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:1px 7px;font-size:11.5px;font-weight:600;color:var(--muted);margin-left:5px}
+.cpy:hover{background:var(--accent-soft);color:var(--accent)}
 .ptbl{width:100%;border-collapse:collapse;font-size:14px}
 .ptbl th{text-align:left;font-size:12px;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line)}
 .ptbl td{padding:9px 6px;border-bottom:1px solid var(--line)}
@@ -256,9 +266,11 @@ button.check:hover{border-color:var(--ok);color:var(--ok)}
     <div class="fld"><label for="lpw">비밀번호</label><input class="in" id="lpw" name="password" type="password" autocomplete="current-password" required></div>
     <div id="suFields" hidden>
       <div class="fld"><label for="lpw2">비밀번호 확인</label><input class="in" id="lpw2" type="password" autocomplete="new-password"></div>
-      <div class="fld"><label for="lpos">직분</label><input class="in" id="lpos" maxlength="20" placeholder="예: 집사, 권사, 장로"></div>
+      <div class="fld"><label for="lname">이름</label><input class="in" id="lname" maxlength="20" placeholder="실명" autocomplete="name"></div>
+      <div class="fld"><label for="lpos">직분</label><input class="in" id="lpos" list="posList" maxlength="20" placeholder="선택하거나 직접 입력"></div>
       <div class="fld"><label for="ltel">전화번호</label><input class="in" id="ltel" type="tel" maxlength="20" placeholder="010-0000-0000"></div>
     </div>
+    <datalist id="posList"><option value="담임목사"><option value="목사"><option value="전도사"><option value="장로"><option value="직원"><option value="권사"><option value="집사"><option value="성도"></datalist>
     <label class="chk"><input type="checkbox" id="lauto" checked> 자동 로그인</label>
     <div class="login-err" id="loginErr" role="alert"></div>
     <button class="btn primary" type="submit" id="loginBtn">로그인</button>
@@ -287,6 +299,7 @@ button.check:hover{border-color:var(--ok);color:var(--ok)}
           <button data-act="notify">알림 허용</button>
           <button data-act="members" id="menuMembers" hidden>회원 관리</button>
           <hr>
+          <button data-act="contacts">연락망</button>
           <button data-act="logout">로그아웃</button>
         </div>
       </div>
@@ -586,7 +599,7 @@ function render(){
     : (m ? '<button class="btn sm" data-act="roster-pray">담당자 명단 · 순서</button><button class="btn sm" data-act="gen-pray">기간 일괄 생성</button>' : '') +
       '<button class="btn sm" data-act="past-pray">🕘 지난 2주 보기</button>';
 
-  $('#meInfo').textContent = ME ? `${ME.login_id}${ME.position ? ' · ' + ME.position : ''} · ${ME.role_name}` : '';
+  $('#meInfo').textContent = ME ? `${ME.name || ME.login_id}${ME.position ? ' · ' + ME.position : ''} · ${ME.role_name}` : '';
   $('#menuMembers').hidden = !isMaster();
 
   const v = $('#view');
@@ -1128,7 +1141,8 @@ $('#loginForm').addEventListener('submit', async e => {
     let res;
     if (authMode === 'signup'){
       if (pw !== $('#lpw2').value) throw new Error('비밀번호 확인이 일치하지 않아요.');
-      res = await rpc('app_signup', { p_id: id, p_pw: pw, p_position: $('#lpos').value.trim(), p_phone: $('#ltel').value.trim() });
+      if (!$('#lname').value.trim()) throw new Error('이름을 입력해 주세요.');
+      res = await rpc('app_signup', { p_id: id, p_pw: pw, p_name: $('#lname').value.trim(), p_position: $('#lpos').value.trim(), p_phone: $('#ltel').value.trim() });
     } else {
       res = await rpc('app_login', { p_id: id, p_pw: pw });
     }
@@ -1141,7 +1155,7 @@ $('#loginForm').addEventListener('submit', async e => {
   } catch (err) {
     errBox.textContent = err.message || '처리하지 못했어요.';
     const card = $('#loginForm'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
-    $('#lpw').value = '';
+    if (authMode === 'login') $('#lpw').value = '';      // 가입 중에는 입력값을 지우지 않음
   } finally { $('#loginBtn').disabled = false; }
 });
 async function boot(){
@@ -1169,6 +1183,38 @@ async function doLogout(){
   store.clear(); location.reload();
 }
 
+/* ---- 연락망 ---- */
+const POS_ORDER = ['담임목사', '목사', '전도사', '장로', '직원'];
+const posRank = p => { const i = POS_ORDER.indexOf((p || '').replace(/\s+/g, '')); return i < 0 ? POS_ORDER.length : i; };
+const telHref = n => 'tel:' + String(n || '').replace(/[^0-9+]/g, '');
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch {}
+  try {   // 구형 브라우저 대비
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch { return false; }
+}
+async function openContacts(){
+  showModal({
+    title: '연락망',
+    body: '<div id="ctBox"><div class="empty" style="padding:30px">불러오는 중…</div></div>',
+    footer: '<span class="grow"></span><button class="btn" data-close="1">닫기</button>'
+  });
+  let list;
+  try { list = await rpc('app_contacts'); }
+  catch (e){ const b = $('#ctBox'); if (b) b.innerHTML = `<div class="empty" style="padding:30px"><p>${esc(e.message)}</p></div>`; return; }
+  const box = $('#ctBox'); if (!box) return;
+  // 직분 순서: 담임목사 → 목사 → 전도사 → 장로 → 직원 → (그 외) / 같은 직분은 이름순
+  list.sort((a, b) => posRank(a.position) - posRank(b.position) || (a.name || '').localeCompare(b.name || '', 'ko'));
+  box.innerHTML = list.length
+    ? `<table class="ctbl"><thead><tr><th class="c1">이름</th><th class="c2">직분</th><th class="c3">전화번호</th></tr></thead><tbody>${
+        list.map(m => `<tr><td class="nm">${esc(m.name)}</td><td>${esc(m.position || '-')}</td><td>${
+          m.phone ? `<a class="tel" href="${esc(telHref(m.phone))}">${esc(m.phone)}</a><button class="cpy" type="button" data-copy="${esc(m.phone)}">복사</button>` : '<span class="muted">-</span>'
+        }</td></tr>`).join('')}</tbody></table>
+       <p class="note">전화번호를 누르면 전화 앱이 열리고, [복사]를 누르면 번호가 복사됩니다.</p>`
+    : '<div class="empty" style="padding:30px">등록된 회원이 없어요</div>';
+}
+
 /* ---- 회원 관리 (마스터) ---- */
 async function openMembers(){
   showModal({
@@ -1178,22 +1224,39 @@ async function openMembers(){
   });
   loadMembers();
 }
+let memList = [];
 async function loadMembers(){
   let list;
   try { list = await rpc('app_list_members'); } catch (e) { return toast('오류: ' + e.message, 'bad'); }
+  memList = list;
   const box = $('#memList'); if (!box) return;
   box.innerHTML = list.map(m => `<div class="mem" data-id="${m.id}">
-      <div class="l1">${esc(m.login_id)}${m.position ? ` (${esc(m.position)})` : ''}${m.id === ME.id ? ' · 나' : ''}</div>
-      <div class="l2">${esc(m.phone || '전화번호 없음')}</div>
+      <div class="l1">${esc(m.name || m.login_id)}${m.position ? ` (${esc(m.position)})` : ''}${m.id === ME.id ? ' · 나' : ''}</div>
+      <div class="l2">아이디 ${esc(m.login_id)} · ${esc(m.phone || '전화번호 없음')}</div>
       <div class="acts">
         <select class="in" data-role>
           <option value="1" ${m.role_id === 1 ? 'selected' : ''}>1 모든 권한</option>
           <option value="2" ${m.role_id === 2 ? 'selected' : ''}>2 추가·수정·삭제</option>
           <option value="3" ${m.role_id === 3 ? 'selected' : ''}>3 조회만</option>
         </select>
+        <button class="btn sm" data-mem="edit">정보 수정</button>
         <button class="btn sm" data-mem="pw">비번 초기화</button>
         <button class="btn sm danger" data-mem="del">삭제</button>
       </div></div>`).join('');
+}
+
+function openMemberEdit(m){
+  showModal({
+    title: '회원 정보 수정', layer: 2, sticky: true,
+    body: `<form id="mef" novalidate data-id="${m.id}">
+      <p class="note" style="margin:0 0 12px">아이디 ${esc(m.login_id)}</p>
+      <div class="fld"><label for="me-name">이름</label><input class="in" id="me-name" maxlength="20" value="${esc(m.name || '')}"></div>
+      <div class="fld"><label for="me-pos">직분</label><input class="in" id="me-pos" list="posList" maxlength="20" value="${esc(m.position || '')}"></div>
+      <div class="fld"><label for="me-tel">전화번호</label><input class="in" id="me-tel" type="tel" maxlength="20" value="${esc(m.phone || '')}"></div>
+      <p class="note">연락망은 직분이 '담임목사 → 목사 → 전도사 → 장로 → 직원' 순으로 정렬됩니다. 직분은 위 이름 그대로 입력해야 순서가 맞습니다.</p>
+    </form>`,
+    footer: `<span class="grow"></span><button class="btn" type="button" data-close="2">취소</button><button class="btn primary" type="submit" form="mef">저장</button>`
+  });
 }
 
 /* =====================  알림 / 실시간  ===================== */
@@ -1314,6 +1377,7 @@ document.addEventListener('click', async e => {
   if ((x = c('[data-mem]'))){
     const id = Number(x.closest('.mem').dataset.id);
     try {
+      if (x.dataset.mem === 'edit'){ const m = memList.find(r => r.id === id); if (m) openMemberEdit(m); return; }
       if (x.dataset.mem === 'pw'){
         const pw = await askBox({ title: '비밀번호 초기화', message: '새 비밀번호를 입력해 주세요 (4자 이상).<br><span class="muted">해당 회원은 다시 로그인해야 합니다.</span>', input: { type: 'password', placeholder: '새 비밀번호' }, ok: '초기화' });
         if (!pw) return;
@@ -1325,6 +1389,8 @@ document.addEventListener('click', async e => {
     } catch (err) { toast('오류: ' + err.message, 'bad'); }
     loadMembers(); return;
   }
+
+  if ((x = c('[data-copy]'))){ toast(await copyText(x.dataset.copy) ? '전화번호를 복사했어요' : '복사하지 못했어요', ); return; }
 
   // 상단 / 필터
   if ((x = c('[data-filter]'))){
@@ -1345,6 +1411,7 @@ document.addEventListener('click', async e => {
       case 'refresh': state.loading[state.tab] = true; state.error = null; render(); LOADERS[state.tab](); break;
       case 'notify': askNotify(); break;
       case 'members': openMembers(); break;
+      case 'contacts': openContacts(); break;
       case 'logout': doLogout(); break;
       case 'cats': if (canEdit()) openRoster('cat'); break;
       case 'roster-duty': if (canEdit()) openRoster('duty'); break;
@@ -1363,6 +1430,11 @@ document.addEventListener('submit', e => {
   else if (id === 'fp'){ e.preventDefault(); submitPray(e.target); }
   else if (id === 'gd'){ e.preventDefault(); submitGenDuty(); }
   else if (id === 'gp'){ e.preventDefault(); submitGenPray(e.target); }
+  else if (id === 'mef'){
+    e.preventDefault();
+    rpc('app_update_member', { p_member_id: Number(e.target.dataset.id), p_name: $('#me-name').value, p_position: $('#me-pos').value, p_phone: $('#me-tel').value })
+      .then(() => { closeModal(2); toast('회원 정보를 수정했어요'); loadMembers(); refreshMe(); }, err => toast('오류: ' + err.message, 'bad'));
+  }
 });
 document.addEventListener('change', e => {
   if (e.target.id === 'f-preset'){
