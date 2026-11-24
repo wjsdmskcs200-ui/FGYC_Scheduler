@@ -82,7 +82,7 @@ select.in{appearance:auto}
 
 /* ---------- top bar ---------- */
 .topbar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.tb{display:flex;align-items:center;gap:14px;padding:12px 0;flex-wrap:wrap}
+.tb{display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;margin-right:auto}
 .brand .logo{width:38px;height:38px;border-radius:11px;font-size:19px;margin:0}
 .brand b{display:block;font-size:17px;letter-spacing:-.02em;line-height:1.2}
@@ -208,7 +208,7 @@ button.check:hover{border-color:var(--ok);color:var(--ok)}
   .row2{grid-template-columns:1fr 1fr}
   .row2>*{min-width:0}
   .brand small{display:none}
-  .tb{gap:10px;padding:10px 0}
+  .tb{gap:10px;padding-top:10px;padding-bottom:10px}
   .seg{order:3;width:100%}           /* 탭은 둘째 줄에 꽉 차게 */
   .seg button{flex:1;padding:6px 4px}
   #q{max-width:none;width:100%}
@@ -402,7 +402,8 @@ const state = {
   loading: { sch: true, duty: true, pray: true }, error: null, loadedAt: 0
 };
 let ME = null, appStarted = false, authMode = 'login';
-const isMaster = () => !!ME && ME.role_id === 1;
+const isMaster = () => !!ME && ME.role_id === 1;                 // 1: 모든 권한 (회원 관리 포함)
+const canEdit  = () => !!ME && (ME.role_id === 1 || ME.role_id === 2);   // 1·2: 추가 / 수정 / 삭제  (3: 조회만)
 
 /* ---- NEW 배지 / 수정 하이라이트 ---- */
 const CID = (() => { let v = ls.get('cid'); if (!v){ v = Math.random().toString(36).slice(2); ls.set('cid', v); } return v; })();
@@ -499,11 +500,11 @@ function renderSch(){
   if (!list.length){
     return state.sch.length || state.q
       ? emptyHtml('조건에 맞는 일정이 없어요', '검색어나 필터를 바꿔 보세요.')
-      : `<div class="empty"><h3>아직 등록된 일정이 없어요</h3><p>첫 일정을 추가해 보세요.</p>${isMaster() ? '<button class="btn primary" data-new>＋ 새 일정</button>' : ''}</div>`;
+      : `<div class="empty"><h3>아직 등록된 일정이 없어요</h3><p>첫 일정을 추가해 보세요.</p>${canEdit() ? '<button class="btn primary" data-new>＋ 새 일정</button>' : ''}</div>`;
   }
   const rows = list.map(r => {
     const dc = !r.done && r.due_date ? (diffDays(r.due_date) < 0 ? 'late' : diffDays(r.due_date) === 0 ? 'today' : '') : '';
-    const chk = isMaster()
+    const chk = canEdit()
       ? `<button class="check ${r.done ? 'on' : ''}" data-toggle="${r.id}" aria-label="${r.done ? '완료 해제' : '완료 처리'}" title="${r.done ? '완료 해제' : '완료 처리'}">✓</button>`
       : `<span class="check ro ${r.done ? 'on' : ''}">✓</span>`;
     const cn = catName(r.category_id);
@@ -524,7 +525,7 @@ function renderDuty(){
   if (!list.length){
     return state.duties.length || state.q
       ? emptyHtml('조건에 맞는 당직이 없어요', '필터를 바꿔 보세요.')
-      : `<div class="empty"><h3>등록된 당직이 없어요</h3><p>당직자를 등록하고 일정을 만들어 보세요.</p>${isMaster() ? '<button class="btn primary" data-new>＋ 새 당직</button>' : ''}</div>`;
+      : `<div class="empty"><h3>등록된 당직이 없어요</h3><p>당직자를 등록하고 일정을 만들어 보세요.</p>${canEdit() ? '<button class="btn primary" data-new>＋ 새 당직</button>' : ''}</div>`;
   }
   const t = today();
   const rows = list.map(r => `<tr class="row ${r.duty_date < t ? 'past' : ''}" data-open="${r.id}" data-kind="duty" tabindex="0">
@@ -541,7 +542,7 @@ function renderPray(){
   const list = prayList();
   if (!list.length){
     return emptyHtml(`${state.prayCat} 일정이 없어요`, '오늘 이후로 등록된 일정이 없습니다.') +
-      (isMaster() ? '' : '');
+      '';
   }
   const rows = list.map(r => `<tr class="row" data-open="${r.id}" data-kind="pray" tabindex="0">
       <td class="c-d1 dt ${hl(r, 'pray_date')}">${newBadge(r)}${fmt(r.pray_date)}</td>
@@ -577,7 +578,7 @@ function render(){
   $('#chips').innerHTML = chips.map(([k, l, n, cur]) => `<button class="chip ${cur === k ? 'on' : ''}" data-filter="${k}">${l}<em>${n}</em></button>`).join('');
 
   // 도구 버튼
-  const m = isMaster();
+  const m = canEdit();
   $('#tools').innerHTML = state.tab === 'sch'
     ? (m ? '<button class="btn sm" data-act="cats">항목 관리 · 우선순위</button>' : '')
     : state.tab === 'duty'
@@ -586,7 +587,7 @@ function render(){
       '<button class="btn sm" data-act="past-pray">🕘 지난 2주 보기</button>';
 
   $('#meInfo').textContent = ME ? `${ME.login_id}${ME.position ? ' · ' + ME.position : ''} · ${ME.role_name}` : '';
-  $('#menuMembers').hidden = !m;
+  $('#menuMembers').hidden = !isMaster();
 
   const v = $('#view');
   if (state.loading[state.tab]){ v.innerHTML = '<div class="empty">불러오는 중…</div>'; return; }
@@ -644,7 +645,7 @@ function openDetail(kind, id){
         <div class="d-badges">${schBadge(r)}${cn ? `<span class="bd acc">${esc(cn)}</span>` : ''}${newBadge(r)}</div>
         <dl class="meta"><dt>마감일</dt><dd>${r.due_date ? fmt(r.due_date) : '-'}</dd><dt>상태</dt><dd>${r.done ? '완료' : '미완'}</dd></dl>
         <div class="d-content">${r.content ? esc(r.content) : '<span class="muted">내용이 없습니다.</span>'}</div>`,
-      footer: isMaster() ? `<button class="btn danger ghost" data-del="${id}" data-kind="sch">삭제</button><span class="grow"></span>
+      footer: canEdit() ? `<button class="btn danger ghost" data-del="${id}" data-kind="sch">삭제</button><span class="grow"></span>
         <button class="btn" data-toggle-d="${id}">${r.done ? '완료 해제' : '완료 처리'}</button>
         <button class="btn primary" data-edit="${id}" data-kind="sch">수정</button>` : ''
     });
@@ -655,7 +656,7 @@ function openDetail(kind, id){
       body: `<div class="d-title">${esc(r.worker_name)}</div>
         <div class="d-badges">${dayBadge(r.duty_date)}${newBadge(r)}</div>
         <dl class="meta"><dt>당직일자</dt><dd>${fmt(r.duty_date)}</dd><dt>근무시간</dt><dd>${fmtT(r.start_time)} ~ ${fmtT(r.end_time)}</dd></dl>`,
-      footer: isMaster() ? `<button class="btn danger ghost" data-del="${id}" data-kind="duty">삭제</button>
+      footer: canEdit() ? `<button class="btn danger ghost" data-del="${id}" data-kind="duty">삭제</button>
         <button class="btn sm" data-move="-1" data-kind="duty" data-id="${id}" title="위 행과 당직자 교환">순서 ▲</button>
         <button class="btn sm" data-move="1" data-kind="duty" data-id="${id}" title="아래 행과 당직자 교환">순서 ▼</button>
         <button class="btn sm" data-rotate data-kind="duty" data-id="${id}">여기부터 재배정</button>
@@ -668,7 +669,7 @@ function openDetail(kind, id){
       body: `<div class="d-title">${esc(prNames(r))}</div>
         <div class="d-badges"><span class="bd acc">${esc(r.category)}</span>${dayBadge(r.pray_date)}${newBadge(r)}</div>
         <dl class="meta"><dt>날짜</dt><dd>${fmt(r.pray_date)}</dd></dl>`,
-      footer: isMaster() ? `<button class="btn danger ghost" data-del="${id}" data-kind="pray">삭제</button>
+      footer: canEdit() ? `<button class="btn danger ghost" data-del="${id}" data-kind="pray">삭제</button>
         <button class="btn sm" data-move="-1" data-kind="pray" data-id="${id}" title="위 행과 담당자 교환">순서 ▲</button>
         <button class="btn sm" data-move="1" data-kind="pray" data-id="${id}" title="아래 행과 담당자 교환">순서 ▼</button>
         <button class="btn sm" data-rotate data-kind="pray" data-id="${id}">여기부터 재배정</button>
@@ -1092,7 +1093,7 @@ function openPast(){
 
 /* =====================  로그인 / 회원가입 / 권한  ===================== */
 function applyRole(){
-  document.body.classList.toggle('role-user', !!ME && !isMaster());
+  document.body.classList.toggle('role-user', !!ME && !canEdit());
 }
 function setAuthMode(m){
   authMode = m;
@@ -1135,7 +1136,7 @@ $('#loginForm').addEventListener('submit', async e => {
     ls.set('lastId', id);
     ME = res; enterApp();
     toast(authMode === 'signup'
-      ? (res.role_id === 1 ? '가입 완료! 첫 가입자라 마스터 권한이 부여되었어요' : '가입이 완료되었어요')
+      ? (res.role_id === 1 ? '가입 완료! 첫 가입자라 모든 권한이 부여되었어요' : '가입이 완료되었어요. 조회 권한으로 시작하며, 수정 권한은 관리자가 부여합니다')
       : `${res.login_id}님 환영합니다`);
   } catch (err) {
     errBox.textContent = err.message || '처리하지 못했어요.';
@@ -1172,7 +1173,7 @@ async function doLogout(){
 async function openMembers(){
   showModal({
     title: '회원 관리',
-    body: '<div id="memList"><div class="empty" style="padding:30px">불러오는 중…</div></div><p class="note">권한 1 = 마스터(모든 기능), 2 = 유저(조회만). 마스터는 최소 1명이 있어야 합니다.</p>',
+    body: '<div id="memList"><div class="empty" style="padding:30px">불러오는 중…</div></div><p class="note">권한 1 = 모든 권한(회원 관리 포함), 2 = 내용 추가·수정·삭제, 3 = 조회만. 새로 가입한 회원은 3(조회만)으로 시작합니다. 모든 권한(1)은 최소 1명이 있어야 합니다.</p>',
     footer: '<span class="grow"></span><button class="btn" data-close="1">닫기</button>'
   });
   loadMembers();
@@ -1186,8 +1187,9 @@ async function loadMembers(){
       <div class="l2">${esc(m.phone || '전화번호 없음')}</div>
       <div class="acts">
         <select class="in" data-role>
-          <option value="1" ${m.role_id === 1 ? 'selected' : ''}>1 마스터</option>
-          <option value="2" ${m.role_id === 2 ? 'selected' : ''}>2 유저</option>
+          <option value="1" ${m.role_id === 1 ? 'selected' : ''}>1 모든 권한</option>
+          <option value="2" ${m.role_id === 2 ? 'selected' : ''}>2 추가·수정·삭제</option>
+          <option value="3" ${m.role_id === 3 ? 'selected' : ''}>3 조회만</option>
         </select>
         <button class="btn sm" data-mem="pw">비번 초기화</button>
         <button class="btn sm danger" data-mem="del">삭제</button>
@@ -1282,7 +1284,7 @@ document.addEventListener('click', async e => {
 
   // 새로 만들기
   if (c('[data-new]')){
-    if (!isMaster()) return;
+    if (!canEdit()) return;
     if (state.tab === 'sch') openSchForm(); else if (state.tab === 'duty') openDutyForm(); else openPrayForm();
     return;
   }
@@ -1344,11 +1346,11 @@ document.addEventListener('click', async e => {
       case 'notify': askNotify(); break;
       case 'members': openMembers(); break;
       case 'logout': doLogout(); break;
-      case 'cats': if (isMaster()) openRoster('cat'); break;
-      case 'roster-duty': if (isMaster()) openRoster('duty'); break;
-      case 'roster-pray': if (isMaster()) openRoster('pray'); break;
-      case 'gen-duty': if (isMaster()) openGenDuty(); break;
-      case 'gen-pray': if (isMaster()) openGenPray(); break;
+      case 'cats': if (canEdit()) openRoster('cat'); break;
+      case 'roster-duty': if (canEdit()) openRoster('duty'); break;
+      case 'roster-pray': if (canEdit()) openRoster('pray'); break;
+      case 'gen-duty': if (canEdit()) openGenDuty(); break;
+      case 'gen-pray': if (canEdit()) openGenPray(); break;
       case 'past-pray': openPast(); break;
     }
   }

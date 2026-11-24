@@ -1,5 +1,5 @@
 // 앱 화면(껍데기)만 캐시합니다. Supabase 데이터 요청은 항상 네트워크로 보냅니다.
-const CACHE = 'yeongsan-v2';
+const CACHE = 'yeongsan-v3';
 
 // 알림을 누르면 앱 열기
 self.addEventListener('notificationclick', e => {
